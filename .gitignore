@@ -1,0 +1,31 @@
+# Ignore unpacked Mozilla Gecko source tree and build artifacts
+engine/
+obj-*/
+dist/
+target/
+toolchain/
+.surfer/
+
+# Compiled libraries and binaries
+*.xpi
+*.pdb
+*.lib
+*.dll
+*.exe
+*.lnk
+
+# Build logs and temporary files
+*.log
+msi_extract.log
+
+# Node dependencies
+node_modules/
+
+# Runtime credentials / generated profiles
+warp_profile.json
+
+# Internal AI playbooks & agent configs
+antigravity_gecko_agent_playbook.md
+custom_gecko_browser_implementation_plan.md
+GEMINI.md
+.agent/

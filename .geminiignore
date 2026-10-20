@@ -1,0 +1,10 @@
+# Ignore unpacked Mozilla Gecko source tree and build artifacts
+engine/
+obj-*/
+dist/
+*.xpi
+*.pdb
+*.lib
+*.dll
+node_modules/
+target/

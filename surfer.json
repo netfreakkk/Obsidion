@@ -1,0 +1,10 @@
+{
+  "name": "Obsidion",
+  "vendor": "Obsidion",
+  "appId": "obsidion",
+  "binaryName": "obsidion",
+  "version": {
+    "product": "firefox",
+    "version": "158.0"
+  }
+}

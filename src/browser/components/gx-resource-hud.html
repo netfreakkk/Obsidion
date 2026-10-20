@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Obsidion Resource &amp; Privacy HUD</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #0B0F17;
+      color: #F3F4F6;
+      padding: 14px;
+      user-select: none;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .hud-panel {
+      background: linear-gradient(180deg, #131B2E 0%, #0F172A 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    .hud-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 10px;
+    }
+
+    .hud-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #00F0FF;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: #10B981;
+      box-shadow: 0 0 8px #10B981;
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+
+    /* Sliders Section */
+    .metric-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .metric-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #9CA3AF;
+    }
+
+    .metric-value {
+      font-weight: 600;
+      color: #F3F4F6;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .slider-container input[type="range"] {
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #1F293D;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    .slider-container input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #00F0FF;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+      transition: transform 0.1s ease;
+    }
+
+    .slider-container input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    /* Actions */
+    .hud-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-top: 4px;
+    }
+
+    .action-btn {
+      background: #1E293B;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #E2E8F0;
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .action-btn:hover {
+      background: #27354A;
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .action-btn:active {
+      transform: translateY(0);
+    }
+
+    .action-btn.unload:hover {
+      border-color: #F59E0B;
+      color: #FCD34D;
+    }
+
+    /* WARP VPN Toggle Pill */
+    .vpn-pill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(17, 24, 39, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 30px;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .vpn-pill.active {
+      border-color: #3B82F6;
+      background: rgba(59, 130, 246, 0.12);
+    }
+
+    .vpn-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .vpn-status-badge {
+      font-size: 10px;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      background: #374151;
+      color: #9CA3AF;
+    }
+
+    .vpn-pill.active .vpn-status-badge {
+      background: #10B981;
+      color: #042F2E;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 36px;
+      height: 20px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #374151;
+      border-radius: 20px;
+      transition: .2s;
+    }
+
+    .switch-slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      border-radius: 50%;
+      transition: .2s;
+    }
+
+    input:checked + .switch-slider {
+      background-color: #3B82F6;
+    }
+
+    input:checked + .switch-slider:before {
+      transform: translateX(16px);
+    }
+
+    .status-toast {
+      font-size: 11px;
+      color: #10B981;
+      text-align: center;
+      min-height: 16px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .status-toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hud-panel">
+    <div class="hud-header">
+      <div class="hud-title">
+        <span class="live-dot"></span>
+        Obsidion Resource HUD
+      </div>
+      <span id="current-rss-display" style="font-size: 11px; color: #9CA3AF;">RAM: ~280 MB</span>
+    </div>
+
+    <!-- Live RAM Cap Slider -->
+    <div class="metric-group">
+      <div class="metric-label-row">
+        <span>Win32 Job RAM Cap</span>
+        <span id="ram-cap-val" class="metric-value">1024 MB</span>
+      </div>
+      <div class="slider-container">
+        <input type="range" id="ram-slider" min="256" max="4096" step="128" value="1024">
+      </div>
+    </div>
+
+    <!-- Live CPU Rate Control Slider -->
+    <div class="metric-group">
+      <div class="metric-label-row">
+        <span>Max CPU Rate Control</span>
+        <span id="cpu-cap-val" class="metric-value">60%</span>
+      </div>
+      <div class="slider-container">
+        <input type="range" id="cpu-slider" min="10" max="100" step="5" value="60">
+      </div>
+    </div>
+
+    <div class="hud-actions">
+      <!-- Unload Idle Tabs Button -->
+      <button id="unload-tabs-btn" class="action-btn unload">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+        Unload Idle Tabs Now
+      </button>
+
+      <!-- Cloudflare WARP VPN Toggle Pill -->
+      <div id="warp-vpn-pill" class="vpn-pill">
+        <div class="vpn-info">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>Cloudflare WARP</span>
+          <span id="vpn-status-text" class="vpn-status-badge">OFF</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="vpn-toggle-checkbox">
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+
+      <div id="status-toast" class="status-toast">Purged inactive tab memory</div>
+    </div>
+  </div>
+
+  <script src="gx-resource-hud.js"></script>
+</body>
+</html>

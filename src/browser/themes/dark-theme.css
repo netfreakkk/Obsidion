@@ -1,0 +1,80 @@
+/* ==========================================================================
+   MyBrowser Obsidian Dark Chrome Theme (120Hz GPU-Accelerated)
+   Eliminates white flashes, forces #0B0F17 base canvas, and styles UI panels.
+   ========================================================================== */
+
+:root {
+  --canvas-background: #0B0F17 !important;
+  --surface-sidebar: #111827 !important;
+  --surface-toolbar: #131B2E !important;
+  --surface-card: #1F293D !important;
+  --surface-hover: #26334D !important;
+  
+  --border-color: rgba(255, 255, 255, 0.08) !important;
+  --border-active: #3B82F6 !important;
+  
+  --text-primary: #F3F4F6 !important;
+  --text-secondary: #9CA3AF !important;
+  --text-muted: #6B7280 !important;
+  
+  --accent-cyan: #00F0FF !important;
+  --accent-blue: #3B82F6 !important;
+  --accent-green: #10B981 !important;
+  --accent-red: #EF4444 !important;
+  
+  --sidebar-width-expanded: 240px;
+  --sidebar-width-collapsed: 56px;
+  --hud-height: 220px;
+}
+
+/* 1. Eliminate White Flashes across the entire window canvas */
+#main-window,
+#browser,
+#appcontent,
+#tabbrowser-tabpanels,
+browser[type="content"],
+browser[primary="true"],
+.browserStack {
+  background-color: var(--canvas-background) !important;
+  background: var(--canvas-background) !important;
+}
+
+/* 2. Navigator Toolbox & URL Bar */
+#navigator-toolbox {
+  background-color: var(--surface-toolbar) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+#nav-bar {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  padding: 4px 8px !important;
+}
+
+#urlbar-background {
+  background-color: var(--surface-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+#urlbar[focused="true"] > #urlbar-background {
+  border-color: var(--accent-cyan) !important;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.25) !important;
+}
+
+#urlbar-input {
+  color: var(--text-primary) !important;
+}
+
+/* 3. Smooth GPU Transitions for Fluidity */
+* {
+  box-sizing: border-box;
+}
+
+.gpu-accelerated {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, opacity;
+}

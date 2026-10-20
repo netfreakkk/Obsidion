@@ -1,0 +1,192 @@
+/* ==========================================================================
+   Obsidion Bespoke Chrome Theme - "Floating Island" Aesthetic
+   Features: 
+   - Floating rounded webpage viewport with dark glass shadow
+   - Centered floating pill URL bar
+   - Dedicated left sidebar dock for vertical tabs & Obsidion Hub
+   - Cyan/Violet glowing accents and zero white flash
+   ========================================================================== */
+
+:root {
+  --canvas-background: #0B0F17 !important;
+  --surface-sidebar: #0E131F !important;
+  --surface-toolbar: #111827 !important;
+  --surface-card: #182235 !important;
+  --surface-hover: #1F2D47 !important;
+  --surface-active: #263554 !important;
+  
+  --border-color: rgba(255, 255, 255, 0.08) !important;
+  --border-accent: rgba(0, 240, 255, 0.35) !important;
+  --accent-cyan: #00F0FF !important;
+  --accent-blue: #3B82F6 !important;
+  --accent-green: #10B981 !important;
+  
+  --text-primary: #F3F4F6 !important;
+  --text-secondary: #9CA3AF !important;
+
+  /* Global Firefox theme variable overrides */
+  --toolbar-bgcolor: var(--canvas-background) !important;
+  --toolbar-color: var(--text-primary) !important;
+  --toolbar-field-background-color: var(--surface-card) !important;
+  --toolbar-field-color: var(--text-primary) !important;
+  --toolbar-field-focus-background-color: var(--surface-card) !important;
+  --toolbar-field-focus-color: var(--text-primary) !important;
+  --lwt-accent-color: var(--canvas-background) !important;
+  --lwt-text-color: var(--text-primary) !important;
+  --arrowpanel-background: var(--surface-toolbar) !important;
+  --arrowpanel-color: var(--text-primary) !important;
+  --arrowpanel-border-color: var(--border-color) !important;
+}
+
+/* 1. Base Window Obsidian Background */
+#main-window,
+#browser,
+#titlebar,
+.browserStack {
+  background-color: var(--canvas-background) !important;
+  background: var(--canvas-background) !important;
+}
+
+/* 2. Floating Island Web Viewport (Arc / Zen Aesthetic) */
+#appcontent {
+  background-color: var(--canvas-background) !important;
+  padding: 0 8px 8px 0 !important;
+}
+
+#tabbrowser-tabpanels {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.7) !important;
+  background-color: var(--canvas-background) !important;
+}
+
+browser[type="content"],
+browser[primary="true"] {
+  border-radius: 12px !important;
+  background-color: var(--canvas-background) !important;
+}
+
+/* 3. Sleek Floating Navigation Bar & Centered URL Bar */
+#navigator-toolbox {
+  background-color: var(--canvas-background) !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+#nav-bar {
+  background-color: var(--canvas-background) !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 6px 12px !important;
+}
+
+#urlbar-container {
+  max-width: 680px !important;
+  margin: 0 auto !important;
+}
+
+#urlbar-background {
+  background-color: var(--surface-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 24px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+#urlbar[focused="true"] > #urlbar-background {
+  border-color: var(--accent-cyan) !important;
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.3) !important;
+}
+
+#urlbar-input {
+  color: var(--text-primary) !important;
+  text-align: center !important;
+}
+
+#urlbar[focused="true"] #urlbar-input {
+  text-align: left !important;
+}
+
+/* 4. Left Sidebar Dock & Vertical Tabs (Gecko 158) */
+#sidebar-box,
+#sidebar,
+#sidebar-main {
+  background-color: var(--surface-sidebar) !important;
+  border-right: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+#sidebar-header {
+  background-color: var(--surface-sidebar) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+  text-transform: uppercase !important;
+  font-size: 11px !important;
+  color: var(--accent-cyan) !important;
+}
+
+/* Vertical tab items styling */
+.tabbrowser-tab {
+  border-radius: 8px !important;
+  margin: 3px 6px !important;
+  transition: all 0.15s ease !important;
+}
+
+.tabbrowser-tab:hover {
+  background-color: var(--surface-hover) !important;
+}
+
+.tabbrowser-tab[selected="true"] {
+  background-color: var(--surface-active) !important;
+  border-left: 3px solid var(--accent-cyan) !important;
+  box-shadow: inset 0 0 12px rgba(0, 240, 255, 0.1) !important;
+  font-weight: 600 !important;
+}
+
+.tab-background {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+.tabbrowser-tab[selected="true"] .tab-text {
+  color: #FFFFFF !important;
+}
+
+/* 5. Prominent Obsidion VPN & Core Hub Toolbar Button */
+#obsidion-hud_obsidion_org-browser-action,
+#_obsidion-hud_obsidion_org-browser-action {
+  background: rgba(0, 240, 255, 0.12) !important;
+  border: 1px solid rgba(0, 240, 255, 0.45) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.25) !important;
+  margin: 2px 6px !important;
+  padding: 3px 6px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+#obsidion-hud_obsidion_org-browser-action:hover,
+#_obsidion-hud_obsidion_org-browser-action:hover {
+  background: rgba(0, 240, 255, 0.25) !important;
+  border-color: var(--accent-cyan) !important;
+  box-shadow: 0 0 18px rgba(0, 240, 255, 0.5) !important;
+  transform: translateY(-1px) scale(1.05) !important;
+}
+
+#obsidion-hud_obsidion_org-browser-action .toolbarbutton-badge,
+#_obsidion-hud_obsidion_org-browser-action .toolbarbutton-badge {
+  background-color: var(--accent-cyan) !important;
+  color: #0B0F17 !important;
+  font-weight: 800 !important;
+  font-size: 9px !important;
+  border-radius: 4px !important;
+  padding: 1px 4px !important;
+  display: block !important;
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.7) !important;
+}
+
+/* 6. Dark Scrollbars */
+* {
+  scrollbar-color: #374151 #0B0F17 !important;
+  scrollbar-width: thin !important;
+}

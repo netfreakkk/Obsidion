@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Obsidion Core Hub</title>
+  <style>
+    :root {
+      --accent-glow: #00F0FF;
+      --accent-glow-rgb: 0, 240, 255;
+      --bg-void: #0B0F17;
+      --bg-panel: #0E1422;
+      --bg-card: rgba(18, 26, 43, 0.7);
+      --bg-card-hover: rgba(28, 40, 65, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --text-main: #F3F4F6;
+      --text-muted: #9CA3AF;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      padding: 12px;
+      user-select: none;
+      width: 100%;
+      min-width: 290px;
+      max-width: 360px;
+      height: 100vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    }
+
+    .hub-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Header */
+    .hub-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+    }
+
+    .hub-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--accent-glow);
+    }
+
+    .brand-icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    .audio-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .audio-toggle-btn.active {
+      color: var(--accent-glow);
+      border-color: var(--accent-glow);
+      box-shadow: 0 0 8px rgba(var(--accent-glow-rgb), 0.3);
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(var(--accent-glow-rgb), 0.3);
+    }
+
+    .card-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Circular RAM Gauge */
+    .gauge-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 4px 0;
+    }
+
+    .circular-gauge {
+      position: relative;
+      width: 84px;
+      height: 84px;
+    }
+
+    .circular-gauge svg {
+      width: 84px;
+      height: 84px;
+      transform: rotate(-90deg);
+    }
+
+    .gauge-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.08);
+      stroke-width: 7;
+    }
+
+    .gauge-bar {
+      fill: none;
+      stroke: var(--accent-glow);
+      stroke-width: 7;
+      stroke-linecap: round;
+      stroke-dasharray: 226;
+      stroke-dashoffset: 140;
+      transition: stroke-dashoffset 0.6s ease, stroke 0.3s ease;
+      filter: drop-shadow(0 0 6px var(--accent-glow));
+    }
+
+    .gauge-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .gauge-val {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .gauge-sub {
+      font-size: 9px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .gauge-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .stat-pill {
+      font-size: 11px;
+      color: var(--text-muted);
+      background: rgba(0, 0, 0, 0.25);
+      padding: 4px 8px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .stat-pill strong {
+      color: var(--text-main);
+    }
+
+    /* Sliders */
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .slider-val {
+      font-weight: 700;
+      color: var(--accent-glow);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #1A2338;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent-glow);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--accent-glow);
+      transition: transform 0.1s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Buttons */
+    .action-btn {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      background: linear-gradient(135deg, #182238 0%, #101726 100%);
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .action-btn:hover {
+      border-color: var(--accent-glow);
+      box-shadow: 0 0 12px rgba(var(--accent-glow-rgb), 0.3);
+      color: var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    /* VPN Box */
+    .vpn-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .vpn-box.connected {
+      border-color: #10B981;
+      background: rgba(16, 185, 129, 0.1);
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.2);
+    }
+
+    .vpn-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .vpn-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .vpn-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .switch-toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+    }
+
+    .switch-toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #374151;
+      border-radius: 20px;
+      transition: 0.2s;
+    }
+
+    .switch-slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+
+    input:checked + .switch-slider {
+      background: #10B981;
+    }
+
+    input:checked + .switch-slider:before {
+      transform: translateX(16px);
+    }
+
+    /* Accent Palette */
+    .palette-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .color-chip {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .color-chip:hover {
+      transform: scale(1.15);
+    }
+
+    .color-chip.active {
+      border-color: #FFFFFF;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    /* Lo-Fi Player Widget */
+    .lofi-player {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+
+    .lofi-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+    }
+
+    .lofi-btn {
+      background: var(--accent-glow);
+      color: #0B0F17;
+      border: none;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 800;
+      transition: transform 0.1s ease;
+    }
+
+    .lofi-btn:hover {
+      transform: scale(1.1);
+    }
+
+    /* Toast */
+    .toast {
+      font-size: 11px;
+      color: var(--accent-glow);
+      text-align: center;
+      min-height: 16px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="hub-container">
+    <!-- Header -->
+    <div class="hub-header">
+      <div class="hub-brand">
+        <svg class="brand-icon" viewBox="0 0 64 64" fill="none">
+          <polygon points="32,6 56,22 56,42 32,58 8,42 8,22" stroke="var(--accent-glow)" stroke-width="4" fill="rgba(0, 240, 255, 0.1)"/>
+          <circle cx="32" cy="32" r="5" fill="var(--accent-glow)"/>
+        </svg>
+        Obsidion Core
+      </div>
+      <button id="sfx-toggle-btn" class="audio-toggle-btn active" title="Cybernetic UI Sound FX">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
+        <span>SFX ON</span>
+      </button>
+    </div>
+
+    <!-- Live RAM Limiter & Gauge -->
+    <div class="card">
+      <div class="card-title">
+        <span>RAM Governor</span>
+        <span id="ram-used-text" style="color: var(--accent-glow);">340 MB</span>
+      </div>
+      <div class="gauge-wrapper">
+        <div class="circular-gauge">
+          <svg>
+            <circle class="gauge-bg" cx="42" cy="42" r="36"></circle>
+            <circle id="ram-circle" class="gauge-bar" cx="42" cy="42" r="36"></circle>
+          </svg>
+          <div class="gauge-text">
+            <span id="ram-percent" class="gauge-val">34%</span>
+            <span class="gauge-sub">Capacity</span>
+          </div>
+        </div>
+        <div class="gauge-stats">
+          <div class="stat-pill">Hard Cap: <strong id="cap-text">1024 MB</strong></div>
+          <div class="stat-pill">Tabs Open: <strong id="tabs-count">1</strong></div>
+          <div class="stat-pill">Status: <strong style="color: #10B981;">Optimal</strong></div>
+        </div>
+      </div>
+      <div class="slider-row">
+        <div class="slider-labels">
+          <span>Limit Ceiling</span>
+          <span id="slider-cap-val" class="slider-val">1024 MB</span>
+        </div>
+        <input type="range" id="ram-slider" min="256" max="2048" step="128" value="1024">
+      </div>
+      <button id="purge-btn" class="action-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+        Purge Inactive Tabs &amp; RAM
+      </button>
+    </div>
+
+    <!-- Cloudflare WARP VPN Center -->
+    <div class="card">
+      <div class="card-title">
+        <span>Cloudflare WARP VPN</span>
+        <span id="vpn-ping-badge" style="font-size: 10px; color: #10B981;">14ms</span>
+      </div>
+      <div id="vpn-toggle-box" class="vpn-box">
+        <div class="vpn-left">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <div>
+            <div id="vpn-state-label" class="vpn-title">Disconnected</div>
+            <div class="vpn-sub">Rootless SOCKS5 127.0.0.1:40000</div>
+          </div>
+        </div>
+        <label class="switch-toggle">
+          <input type="checkbox" id="vpn-checkbox">
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- CPU Rate Limiter -->
+    <div class="card">
+      <div class="card-title">
+        <span>CPU Rate Control</span>
+        <span id="cpu-val-display" class="slider-val">60%</span>
+      </div>
+      <div class="slider-row">
+        <div class="slider-labels">
+          <span>Max CPU Throttle</span>
+          <span>EcoQoS Active</span>
+        </div>
+        <input type="range" id="cpu-slider" min="10" max="100" step="5" value="60">
+      </div>
+    </div>
+
+    <!-- Necko Shield Stats -->
+    <div class="card">
+      <div class="card-title">
+        <span>Necko Shield Adblock</span>
+        <span style="color: #10B981;">ACTIVE</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 12px; color: var(--text-muted);">Blocked Trackers &amp; Ads:</span>
+        <span id="adblock-counter" style="font-size: 16px; font-weight: 800; color: var(--accent-glow);">148</span>
+      </div>
+    </div>
+
+    <!-- Ambient Lo-Fi Chill Player -->
+    <div class="card">
+      <div class="card-title">
+        <span>Ambient Chill Stream</span>
+        <span style="font-size: 9px; color: var(--text-muted);">Lo-Fi Focus</span>
+      </div>
+      <div class="lofi-player">
+        <div class="lofi-info">
+          <button id="lofi-play-btn" class="lofi-btn">▶</button>
+          <span>Lofi Beats Radio</span>
+        </div>
+        <input type="range" id="lofi-volume" min="0" max="1" step="0.05" value="0.5" style="width: 70px;">
+      </div>
+      <audio id="lofi-audio" preload="none" src="https://stream.zeno.fm/f3wvbbqmdg8uv"></audio>
+    </div>
+
+    <!-- Accent Color Glow Picker -->
+    <div class="card">
+      <div class="card-title">
+        <span>Accent Glow Theme</span>
+        <span id="accent-name" style="color: var(--accent-glow);">Cyan</span>
+      </div>
+      <div class="palette-row">
+        <div class="color-chip active" style="background: #00F0FF;" data-color="#00F0FF" data-rgb="0, 240, 255" data-name="Cyan"></div>
+        <div class="color-chip" style="background: #A855F7;" data-color="#A855F7" data-rgb="168, 85, 247" data-name="Violet"></div>
+        <div class="color-chip" style="background: #F43F5E;" data-color="#F43F5E" data-rgb="244, 63, 94" data-name="Crimson"></div>
+        <div class="color-chip" style="background: #10B981;" data-color="#10B981" data-rgb="16, 185, 129" data-name="Emerald"></div>
+        <div class="color-chip" style="background: #F59E0B;" data-color="#F59E0B" data-rgb="245, 158, 11" data-name="Amber"></div>
+      </div>
+    </div>
+
+    <div id="toast-msg" class="toast">Ready</div>
+  </div>
+
+  <script src="gx-resource-hud.js"></script>
+</body>
+</html>
