@@ -408,6 +408,27 @@
       transform: scale(1.1);
     }
 
+    .lofi-sub-btn {
+      background: rgba(255, 255, 255, 0.08);
+      color: #E2E8F0;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 10px;
+      transition: all 0.15s ease;
+    }
+
+    .lofi-sub-btn:hover {
+      background: var(--accent-glow);
+      color: #0B0F17;
+      transform: scale(1.1);
+    }
+
     /* Toast */
     .toast {
       font-size: 11px;
@@ -540,12 +561,13 @@
       </div>
       <div class="lofi-player">
         <div class="lofi-info">
-          <button id="lofi-play-btn" class="lofi-btn">▶</button>
-          <span>Lofi Beats Radio</span>
+          <button id="lofi-play-btn" class="lofi-btn" title="Play / Pause">▶</button>
+          <button id="lofi-next-btn" class="lofi-sub-btn" title="Next Station">⏭</button>
+          <span id="lofi-station-name" style="max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">0R Chillhop</span>
         </div>
-        <input type="range" id="lofi-volume" min="0" max="1" step="0.05" value="0.5" style="width: 70px;">
+        <input type="range" id="lofi-volume" min="0" max="1" step="0.05" value="0.5" style="width: 60px;" title="Volume">
       </div>
-      <audio id="lofi-audio" preload="none" src="https://stream.zeno.fm/f3wvbbqmdg8uv"></audio>
+      <audio id="lofi-audio" preload="none" crossorigin="anonymous" src="https://0nlineradio.stream42.radiohost.de/0r-lo-fi"></audio>
     </div>
 
     <!-- Accent Color Glow Picker -->

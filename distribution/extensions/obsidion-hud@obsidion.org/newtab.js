@@ -546,6 +546,8 @@
   const cpuValDisplay = document.getElementById("cpu-val-display");
   const adblockCounter = document.getElementById("adblock-counter");
   const lofiBtn = document.getElementById("lofi-play-btn");
+  const lofiNextBtn = document.getElementById("lofi-next-btn");
+  const lofiStationName = document.getElementById("lofi-station-name");
   const lofiAudio = document.getElementById("lofi-audio");
   const lofiVolume = document.getElementById("lofi-volume");
   const colorChips = document.querySelectorAll(".color-chip");
@@ -731,32 +733,85 @@
 
   // Lo-Fi Player
   if (lofiBtn && lofiAudio) {
-    let isPlaying = false;
+    const LOFI_STREAMS = [
+      { name: "0R Chillhop & Lo-Fi", url: "https://0nlineradio.stream42.radiohost.de/0r-lo-fi" },
+      { name: "24/7 Lofi Radio", url: "https://ec3.yesstreaming.net:3755/stream" },
+      { name: "Retro Lofi & Chiptune", url: "https://a5.asurahosting.com:8150/radio.mp3" }
+    ];
+    let lofiCurrentIdx = 0;
+    let lofiIsPlaying = false;
+
+    function updateLofiStationUI() {
+      if (lofiStationName) {
+        lofiStationName.textContent = LOFI_STREAMS[lofiCurrentIdx].name;
+        lofiStationName.title = `Current Station: ${LOFI_STREAMS[lofiCurrentIdx].name}`;
+      }
+    }
+
+    function playLofiStation() {
+      lofiAudio.src = LOFI_STREAMS[lofiCurrentIdx].url;
+      lofiAudio.load();
+      lofiAudio.play().then(() => {
+        lofiIsPlaying = true;
+        lofiBtn.textContent = "❚❚";
+        lofiBtn.style.background = "#10B981";
+        showToast(`Playing ${LOFI_STREAMS[lofiCurrentIdx].name}`);
+      }).catch((err) => {
+        console.warn("LoFi playback error, trying next station...", err);
+        switchLofiStation(true);
+      });
+    }
+
+    function switchLofiStation(autoRetry = false) {
+      lofiCurrentIdx = (lofiCurrentIdx + 1) % LOFI_STREAMS.length;
+      updateLofiStationUI();
+      if (lofiIsPlaying || autoRetry) {
+        playLofiStation();
+      } else {
+        lofiAudio.src = LOFI_STREAMS[lofiCurrentIdx].url;
+        showToast(`Station: ${LOFI_STREAMS[lofiCurrentIdx].name}`);
+      }
+    }
+
     lofiBtn.addEventListener("click", () => {
       playCyberClick();
-      if (!isPlaying) {
-        lofiAudio.play().then(() => {
-          isPlaying = true;
-          lofiBtn.textContent = "❚❚";
-          lofiBtn.style.background = "#10B981";
-          showToast("Playing Lo-Fi Focus Radio");
-        }).catch(() => {
-          showToast("Stream unavailable");
-        });
+      if (!lofiIsPlaying) {
+        if (!lofiAudio.src || lofiAudio.src === "" || lofiAudio.src.includes("stream.zeno.fm")) {
+          lofiAudio.src = LOFI_STREAMS[lofiCurrentIdx].url;
+        }
+        playLofiStation();
       } else {
         lofiAudio.pause();
-        isPlaying = false;
+        lofiIsPlaying = false;
         lofiBtn.textContent = "▶";
         lofiBtn.style.background = "var(--accent)";
         showToast("Lo-Fi Paused");
       }
     });
 
+    if (lofiNextBtn) {
+      lofiNextBtn.addEventListener("click", () => {
+        playCyberClick();
+        switchLofiStation(false);
+      });
+    }
+
+    lofiAudio.addEventListener("error", (e) => {
+      if (lofiIsPlaying) {
+        console.warn("LoFi stream error encountered, failing over...", e);
+        showToast("Station signal lost, switching...");
+        switchLofiStation(true);
+      }
+    });
+
     if (lofiVolume) {
+      lofiAudio.volume = parseFloat(lofiVolume.value || "0.5");
       lofiVolume.addEventListener("input", (e) => {
         lofiAudio.volume = parseFloat(e.target.value);
       });
     }
+
+    updateLofiStationUI();
   }
 
   // Dynamic Accent Theme Picker
