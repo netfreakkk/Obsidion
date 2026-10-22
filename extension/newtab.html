@@ -11,16 +11,16 @@
       --bg-dark: #0B0F17;
       --glass-opacity: 0.12;
       --glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.22) 100%), rgba(8, 12, 22, var(--glass-opacity));
-      --glass-border: 1px solid rgba(255, 255, 255, 0.12);
-      --glass-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.18);
+      --glass-border: 1px solid rgba(255, 255, 255, 0.14);
+      --glass-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.20);
       --bg-surface: var(--glass-bg);
       --bg-card: rgba(8, 12, 22, var(--glass-opacity));
-      --bg-card-hover: rgba(var(--accent-rgb), 0.12);
-      --border: rgba(255, 255, 255, 0.12);
+      --bg-card-hover: rgba(var(--accent-rgb), 0.14);
+      --border: rgba(255, 255, 255, 0.14);
       --border-accent: rgba(var(--accent-rgb), 0.70);
       --text: #FFFFFF;
-      --text-dim: #E2E8F0;
-      --text-muted: #CBD5E1;
+      --text-dim: #F8FAFC;
+      --text-muted: #F1F5F9;
       --radius-sm: 10px;
       --radius-md: 14px;
       --radius-lg: 20px;
@@ -41,7 +41,7 @@
       overflow-y: auto;
       position: relative;
       user-select: none;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.7);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 2px 5px rgba(0, 0, 0, 0.85);
     }
 
     /* 1. Wallpaper Engine Background Canvas & Custom Media */
@@ -84,29 +84,22 @@
     }
 
     .vignette-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 1;
-      pointer-events: none;
-      background: radial-gradient(circle at center, transparent 72%, rgba(11, 15, 23, 0.28) 100%);
+      display: none !important;
     }
 
-    /* 2. Top Header Bar - OriginOS 7 Liquid Sheen */
+    /* 2. Top Header Bar - OriginOS 7 Clean Floating Navigation */
     .top-bar {
       position: relative;
       z-index: 10;
       width: 100%;
-      padding: 14px 24px;
+      padding: 12px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      backdrop-filter: blur(12px) saturate(110%);
-      -webkit-backdrop-filter: blur(12px) saturate(110%);
-      background: rgba(8, 12, 22, 0.35);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+      background: transparent !important;
+      border-bottom: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
     }
 
     .brand-logo {
@@ -178,31 +171,34 @@
 
     /* --- SIDE DOCK: Obsidion Core Hub --- */
     .core-dock {
-      width: 320px;
-      min-width: 300px;
+      width: 300px;
+      min-width: 280px;
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      max-height: calc(100vh - 90px);
+      gap: 7px;
+      max-height: calc(100vh - 55px);
       overflow-y: auto;
       overflow-x: hidden;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
-      padding-right: 4px;
+      scrollbar-width: none;
+      padding-right: 2px;
+    }
+
+    .core-dock::-webkit-scrollbar {
+      display: none;
     }
 
     .dock-card {
       background: var(--bg-surface);
       border: var(--glass-border);
       border-radius: var(--radius-md);
-      padding: 14px;
+      padding: 8px 12px;
       backdrop-filter: blur(12px) saturate(110%);
       -webkit-backdrop-filter: blur(12px) saturate(110%);
       box-shadow: var(--glass-shadow);
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 6px;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -639,11 +635,11 @@
 
     .user-greeting {
       font-size: 12px;
-      font-weight: 600;
-      color: #CBD5E1;
+      font-weight: 700;
+      color: #F1F5F9;
       margin-top: 2px;
       letter-spacing: 1px;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 2px 5px rgba(0, 0, 0, 0.85);
     }
 
     /* Search Bar with Engine Picker */
@@ -968,10 +964,8 @@
     /* Quick Links from History */
     .history-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: 10px;
-      max-height: 240px;
-      overflow-y: auto;
     }
 
     .history-card {
@@ -1019,9 +1013,9 @@
 
     .history-domain {
       font-size: 10px;
-      font-weight: 500;
-      color: #E2E8F0;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+      font-weight: 600;
+      color: #F1F5F9;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1058,7 +1052,8 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      max-height: 280px;
+      max-height: 520px;
+      flex: 1;
       overflow-y: auto;
       scrollbar-width: thin;
       scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
@@ -1107,9 +1102,9 @@
       display: flex;
       justify-content: space-between;
       font-size: 10px;
-      font-weight: 500;
-      color: #E2E8F0;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+      font-weight: 600;
+      color: #F1F5F9;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
     }
 
     /* 6. MODAL DIALOGS (Centered, Dark Frosted Glass, High-Contrast) */
@@ -1300,6 +1295,10 @@
         Wallpaper Engine
       </button>
 
+      <button id="sfx-toggle-btn" class="glass-btn" title="Cybernetic Sound FX">
+        <span id="sfx-label">SFX ON</span>
+      </button>
+
       <button id="dock-toggle-btn" class="glass-btn" title="Flip Obsidion Core Dock (Left / Right)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -1316,48 +1315,38 @@
          SIDE DOCK: OBSIDION CORE HUB (Native on the Homepage!)
          ======================================================== -->
     <aside class="core-dock" aria-label="Obsidion Core Controls">
-      <!-- Header with SFX toggle -->
-      <div class="dock-card">
-        <div class="dock-card-header">
-          <span>Obsidion Control Center</span>
-          <button id="sfx-toggle-btn" class="glass-btn" style="padding: 2px 8px; font-size: 10px;" title="Cybernetic Sound FX">
-            SFX ON
-          </button>
-        </div>
-      </div>
-
       <!-- Live RAM Governor (Hooked into Real Task Manager RAM) -->
       <div class="dock-card">
         <div class="dock-card-header">
           <span>RAM Governor</span>
           <span id="ram-used-text" style="color: var(--accent); font-weight: 800;">848 MB</span>
         </div>
-        <div class="gauge-wrapper">
-          <div class="circular-gauge">
-            <svg>
-              <circle class="gauge-bg" cx="43" cy="43" r="37"></circle>
-              <circle id="ram-circle" class="gauge-bar" cx="43" cy="43" r="37"></circle>
+        <div class="gauge-wrapper" style="padding: 2px 0;">
+          <div class="circular-gauge" style="width: 66px; height: 66px;">
+            <svg style="width: 66px; height: 66px; transform: rotate(-90deg);">
+              <circle class="gauge-bg" cx="33" cy="33" r="27" style="stroke-width: 6;"></circle>
+              <circle id="ram-circle" class="gauge-bar" cx="33" cy="33" r="27" style="stroke-width: 6; stroke-dasharray: 170;"></circle>
             </svg>
             <div class="gauge-text">
-              <span id="ram-percent" class="gauge-val">41%</span>
-              <span class="gauge-sub">Load</span>
+              <span id="ram-percent" class="gauge-val" style="font-size: 13px;">41%</span>
+              <span class="gauge-sub" style="font-size: 8px;">Load</span>
             </div>
           </div>
-          <div class="gauge-stats">
-            <div class="stat-pill">Tab Cap: <strong id="cap-text">5 Tabs</strong></div>
-            <div class="stat-pill">Tabs: <strong id="procs-count">0 Sleeping</strong></div>
-            <div class="stat-pill">Hook: <strong id="hook-state" style="color: #10B981;">WebExt Native</strong></div>
+          <div class="gauge-stats" style="gap: 3px;">
+            <div class="stat-pill" style="padding: 3px 8px; font-size: 10px;">Tab Cap: <strong id="cap-text">5 Tabs</strong></div>
+            <div class="stat-pill" style="padding: 3px 8px; font-size: 10px;">Tabs: <strong id="procs-count">0 Sleeping</strong></div>
+            <div class="stat-pill" style="padding: 3px 8px; font-size: 10px;">Hook: <strong id="hook-state" style="color: #34D399;">WebExt Native</strong></div>
           </div>
         </div>
-        <div class="slider-row">
-          <div class="slider-labels">
+        <div class="slider-row" style="gap: 2px;">
+          <div class="slider-labels" style="font-size: 10px;">
             <span>Loaded Tab Ceiling</span>
             <span id="slider-cap-val" class="slider-val">5 Tabs</span>
           </div>
           <input type="range" id="ram-slider" min="2" max="25" step="1" value="5">
         </div>
-        <button id="purge-btn" class="action-btn">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button id="purge-btn" class="action-btn" style="padding: 6px 10px; font-size: 11px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="23 4 23 10 17 10"></polyline>
             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
           </svg>
@@ -1369,16 +1358,16 @@
       <div class="dock-card">
         <div class="dock-card-header">
           <span style="color: #FFFFFF; font-weight: 800;">Obsidion Secure VPN</span>
-          <span id="vpn-ping-badge" style="font-size: 10px; color: #E2E8F0; font-weight: 700;">Off</span>
+          <span id="vpn-ping-badge" style="font-size: 10px; color: #34D399; font-weight: 800;">Off</span>
         </div>
-        <div id="vpn-toggle-box" class="vpn-box">
+        <div id="vpn-toggle-box" class="vpn-box" style="padding: 7px 10px;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent);">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
             </svg>
             <div>
               <div id="vpn-state-label" style="font-size: 11px; font-weight: 800; color: #FFFFFF; text-shadow: 0 1px 2px rgba(0,0,0,0.9);">Disconnected</div>
-              <div id="vpn-mode-desc" style="font-size: 9px; color: #E2E8F0; text-shadow: 0 1px 2px rgba(0,0,0,0.85);">Click switch to connect</div>
+              <div id="vpn-mode-desc" style="font-size: 9px; color: #F1F5F9; text-shadow: 0 1px 2px rgba(0,0,0,0.85);">Click switch to connect</div>
             </div>
           </div>
           <label class="switch-toggle" for="vpn-checkbox">
@@ -1386,15 +1375,15 @@
             <span class="switch-slider"></span>
           </label>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
-          <select id="vpn-provider-select" style="width: 100%; background: #141C2E; border: 1px solid rgba(255,255,255,0.22); color: #FFFFFF; border-radius: 6px; padding: 6px 8px; font-size: 10px; font-weight: 700; outline: none; cursor: pointer;">
+        <div style="display: flex; flex-direction: column; gap: 3px; margin-top: 2px;">
+          <select id="vpn-provider-select" style="width: 100%; background: #141C2E; border: 1px solid rgba(255,255,255,0.22); color: #FFFFFF; border-radius: 6px; padding: 4px 6px; font-size: 10px; font-weight: 700; outline: none; cursor: pointer;">
             <option value="cloudflare_warp">Cloudflare WARP (Fast WireGuard • 127.0.0.1:40000)</option>
             <option value="proton_free">Proton VPN Free (Zero-Logs • NL / US / JP)</option>
             <option value="direct_privacy">Secure Privacy Proxy (Zero Setup)</option>
             <option value="custom_socks5">Custom SOCKS5 / HTTP Proxy</option>
           </select>
           <div id="custom-proxy-row" style="display: none; margin-top: 2px;">
-            <input type="text" id="custom-proxy-input" placeholder="127.0.0.1:1080" value="127.0.0.1:1080" style="width: 100%; background: #0E1422; border: 1px solid rgba(255,255,255,0.22); color: #FFF; border-radius: 6px; padding: 6px 8px; font-size: 10px; outline: none;">
+            <input type="text" id="custom-proxy-input" placeholder="127.0.0.1:1080" value="127.0.0.1:1080" style="width: 100%; background: #0E1422; border: 1px solid rgba(255,255,255,0.22); color: #FFF; border-radius: 6px; padding: 4px 6px; font-size: 10px; outline: none;">
           </div>
         </div>
       </div>
@@ -1409,26 +1398,26 @@
             </svg>
             Atmosphere
           </span>
-          <button id="change-city-btn" class="weather-city-btn" title="Change Location">
+          <button id="change-city-btn" class="weather-city-btn" title="Change Location" style="padding: 2px 6px; font-size: 10px;">
             <span id="weather-city-name">City</span> ▾
           </button>
         </div>
 
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 2px 0;">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0;">
           <div style="display: flex; align-items: baseline; gap: 4px;">
-            <div id="weather-temp" style="font-size: 32px; font-weight: 800; color: #FFFFFF; font-variant-numeric: tabular-nums; text-shadow: 0 2px 4px rgba(0,0,0,0.9);">--°</div>
-            <button id="unit-toggle" class="weather-unit-toggle">°C</button>
+            <div id="weather-temp" style="font-size: 28px; font-weight: 800; color: #FFFFFF; font-variant-numeric: tabular-nums; text-shadow: 0 2px 4px rgba(0,0,0,0.9);">--°</div>
+            <button id="unit-toggle" class="weather-unit-toggle" style="padding: 1px 4px; font-size: 9px;">°C</button>
           </div>
           <div style="display: flex; flex-direction: column; align-items: flex-end;">
-            <div id="weather-icon" style="font-size: 24px; line-height: 1;">☀️</div>
-            <div id="weather-cond" style="font-size: 11px; font-weight: 600; color: #E2E8F0; text-shadow: 0 1px 2px rgba(0,0,0,0.85); margin-top: 2px;">Clear Sky</div>
+            <div id="weather-icon" style="font-size: 20px; line-height: 1;">☀️</div>
+            <div id="weather-cond" style="font-size: 10px; font-weight: 700; color: #FFFFFF; text-shadow: 0 1px 2px rgba(0,0,0,0.85); margin-top: 1px;">Clear Sky</div>
           </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 10px; font-size: 10px; color: #CBD5E1;">
-          <div>Feels: <strong id="weather-feels" style="color: #FFF;">--°C</strong></div>
-          <div>Hum: <strong id="weather-humidity" style="color: #FFF;">--%</strong></div>
-          <div>Wind: <strong id="weather-wind" style="color: #FFF;">-- km/h</strong></div>
+        <div style="display: flex; justify-content: space-between; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 4px 8px; font-size: 9.5px; color: #F1F5F9;">
+          <div>Feels: <strong id="weather-feels" style="color: #FFF; font-weight: 800;">--°C</strong></div>
+          <div>Hum: <strong id="weather-humidity" style="color: #FFF; font-weight: 800;">--%</strong></div>
+          <div>Wind: <strong id="weather-wind" style="color: #FFF; font-weight: 800;">-- km/h</strong></div>
         </div>
       </div>
 
@@ -1438,10 +1427,10 @@
           <span>CPU Throttle</span>
           <span id="cpu-val-display" class="slider-val">60%</span>
         </div>
-        <div class="slider-row">
-          <div class="slider-labels">
+        <div class="slider-row" style="gap: 2px;">
+          <div class="slider-labels" style="font-size: 10px;">
             <span>Power Throttle</span>
-            <span style="color: #10B981; font-weight: 600;">EcoQoS Active</span>
+            <span style="color: #34D399; font-weight: 700;">EcoQoS Active</span>
           </div>
           <input type="range" id="cpu-slider" min="10" max="100" step="5" value="60">
         </div>
@@ -1451,11 +1440,11 @@
       <div class="dock-card">
         <div class="dock-card-header">
           <span>Necko Shield Blocker</span>
-          <span style="color: #10B981;">ACTIVE</span>
+          <span style="color: #34D399; font-weight: 800;">ACTIVE</span>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 11px; color: var(--text-dim);">Blocked Trackers &amp; Ads:</span>
-          <span id="adblock-counter" style="font-size: 15px; font-weight: 800; color: var(--accent);">182</span>
+          <span style="font-size: 10.5px; color: #F1F5F9; font-weight: 600;">Blocked Trackers &amp; Ads:</span>
+          <span id="adblock-counter" style="font-size: 14px; font-weight: 800; color: var(--accent);">182</span>
         </div>
       </div>
 
@@ -1463,14 +1452,14 @@
       <div class="dock-card">
         <div class="dock-card-header">
           <span>Accent Glow Theme</span>
-          <span id="accent-name" style="color: var(--accent);">Cyan</span>
+          <span id="accent-name" style="color: var(--accent); font-weight: 800;">Cyan</span>
         </div>
         <div class="palette-row">
-          <div class="color-chip active" style="background: #00F0FF;" data-color="#00F0FF" data-rgb="0, 240, 255" data-name="Cyan"></div>
-          <div class="color-chip" style="background: #A855F7;" data-color="#A855F7" data-rgb="168, 85, 247" data-name="Violet"></div>
-          <div class="color-chip" style="background: #F43F5E;" data-color="#F43F5E" data-rgb="244, 63, 94" data-name="Crimson"></div>
-          <div class="color-chip" style="background: #10B981;" data-color="#10B981" data-rgb="16, 185, 129" data-name="Emerald"></div>
-          <div class="color-chip" style="background: #F59E0B;" data-color="#F59E0B" data-rgb="245, 158, 11" data-name="Amber"></div>
+          <div class="color-chip active" style="background: #00F0FF; width: 20px; height: 20px;" data-color="#00F0FF" data-rgb="0, 240, 255" data-name="Cyan"></div>
+          <div class="color-chip" style="background: #A855F7; width: 20px; height: 20px;" data-color="#A855F7" data-rgb="168, 85, 247" data-name="Violet"></div>
+          <div class="color-chip" style="background: #F43F5E; width: 20px; height: 20px;" data-color="#F43F5E" data-rgb="244, 63, 94" data-name="Crimson"></div>
+          <div class="color-chip" style="background: #10B981; width: 20px; height: 20px;" data-color="#10B981" data-rgb="16, 185, 129" data-name="Emerald"></div>
+          <div class="color-chip" style="background: #F59E0B; width: 20px; height: 20px;" data-color="#F59E0B" data-rgb="245, 158, 11" data-name="Amber"></div>
         </div>
       </div>
     </aside>
@@ -1533,7 +1522,7 @@
                 <div id="ytm-track-title" style="font-size: 14px; font-weight: 800; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 3px rgba(0,0,0,0.95);">
                   Ready to Stream
                 </div>
-                <div id="ytm-track-artist" style="font-size: 12px; font-weight: 600; color: #CBD5E1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,0.85);">
+                <div id="ytm-track-artist" style="font-size: 12px; font-weight: 700; color: #F1F5F9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,0.85);">
                   YouTube Music
                 </div>
                 <div id="ytm-status-pill" style="display: inline-flex; align-items: center; gap: 5px; font-size: 10px; color: #94A3B8; font-weight: 700; margin-top: 2px;">
@@ -1541,6 +1530,13 @@
                   Ready
                 </div>
               </div>
+            </div>
+
+            <!-- Live Time / Seek Progress Bar -->
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 4px 8px;">
+              <span id="ytm-time-current" style="font-size: 11px; font-weight: 800; font-variant-numeric: tabular-nums; color: #FFFFFF; min-width: 32px; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">0:00</span>
+              <input type="range" id="ytm-seek-bar" min="0" max="100" value="0" style="flex: 1; height: 5px; accent-color: #FF0000; cursor: pointer;" title="Seek / Scrub Track">
+              <span id="ytm-time-duration" style="font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; color: #F1F5F9; min-width: 32px; text-align: right; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">0:00</span>
             </div>
 
             <!-- Controls & Volume Bar -->

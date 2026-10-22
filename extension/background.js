@@ -344,7 +344,8 @@ ext.runtime.onMessage.addListener((request, sender, sendResponse) => {
         ext.tabs.sendMessage(targetTab.id, {
           action: "ytm_cmd",
           command: request.command,
-          volume: request.volume
+          volume: request.volume,
+          time: request.time
         }, (res) => {
           sendResponse(res || { status: "ok" });
         });

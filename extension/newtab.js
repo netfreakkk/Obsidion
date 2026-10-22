@@ -595,12 +595,16 @@
   const ytmTrackArtist = document.getElementById("ytm-track-artist");
   const ytmStatusPill = document.getElementById("ytm-status-pill");
   const ytmVolumeSlider = document.getElementById("ytm-volume-slider");
+  const ytmSeekBar = document.getElementById("ytm-seek-bar");
+  const ytmTimeCurrent = document.getElementById("ytm-time-current");
+  const ytmTimeDuration = document.getElementById("ytm-time-duration");
+  let isScrubbingYtm = false;
   const colorChips = document.querySelectorAll(".color-chip");
   const accentName = document.getElementById("accent-name");
   const hookState = document.getElementById("hook-state");
 
-  const CIRCLE_CIRCUMFERENCE = 232.4; // 2 * PI * 37
   const ext = typeof browser !== "undefined" ? browser : chrome;
+  const CIRCLE_CIRCUMFERENCE = ramCircle && ramCircle.r && ramCircle.r.baseVal ? (2 * Math.PI * ramCircle.r.baseVal.value) : 169.6;
   let currentCap = 5;
 
   function updateRamGauge(loadedCount, capLimit, sleepingCount = 0) {
@@ -844,6 +848,13 @@
   // =========================================================================
   let ytmIsPlaying = false;
 
+  function formatYtmTime(sec) {
+    if (isNaN(sec) || sec < 0) return "0:00";
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
+  }
+
   function updateYtmUI(state) {
     if (!state) return;
     if (ytmTrackTitle && state.title) {
@@ -855,10 +866,23 @@
       ytmTrackArtist.title = state.artist;
     }
     if (ytmThumbnail && state.thumbnail) {
-      ytmThumbnail.src = state.thumbnail;
+      if (ytmThumbnail.src !== state.thumbnail) {
+        ytmThumbnail.src = state.thumbnail;
+      }
+      ytmThumbnail.style.opacity = "1";
     }
     if (state.volume !== undefined && ytmVolumeSlider) {
       ytmVolumeSlider.value = state.volume;
+    }
+    if (state.duration !== undefined && ytmSeekBar && !isScrubbingYtm) {
+      ytmSeekBar.max = Math.max(1, Math.floor(state.duration));
+      ytmSeekBar.value = Math.floor(state.currentTime || 0);
+    }
+    if (ytmTimeCurrent && !isScrubbingYtm) {
+      ytmTimeCurrent.textContent = formatYtmTime(state.currentTime || 0);
+    }
+    if (ytmTimeDuration) {
+      ytmTimeDuration.textContent = formatYtmTime(state.duration || 0);
     }
     ytmIsPlaying = !!state.isPlaying;
     if (ytmStatusPill) {
@@ -918,24 +942,29 @@
           updateYtmUI(res.info);
         }
       });
+      [80, 250, 600].forEach(d => setTimeout(fetchYtmState, d));
     });
   }
 
   if (ytmPrevBtn) {
     ytmPrevBtn.addEventListener("click", () => {
       playCyberClick();
+      if (ytmThumbnail) ytmThumbnail.style.opacity = "0.5";
       ext.runtime.sendMessage({ action: "ytm_control", command: "prev" }, (res) => {
         if (res && res.info) updateYtmUI(res.info);
       });
+      [60, 150, 300, 600, 1000].forEach(d => setTimeout(fetchYtmState, d));
     });
   }
 
   if (ytmNextBtn) {
     ytmNextBtn.addEventListener("click", () => {
       playCyberClick();
+      if (ytmThumbnail) ytmThumbnail.style.opacity = "0.5";
       ext.runtime.sendMessage({ action: "ytm_control", command: "next" }, (res) => {
         if (res && res.info) updateYtmUI(res.info);
       });
+      [60, 150, 300, 600, 1000].forEach(d => setTimeout(fetchYtmState, d));
     });
   }
 
@@ -950,6 +979,20 @@
     ytmVolumeSlider.addEventListener("input", (e) => {
       const vol = parseInt(e.target.value, 10);
       ext.runtime.sendMessage({ action: "ytm_control", command: "set_volume", volume: vol });
+    });
+  }
+
+  if (ytmSeekBar) {
+    ytmSeekBar.addEventListener("input", (e) => {
+      isScrubbingYtm = true;
+      if (ytmTimeCurrent) {
+        ytmTimeCurrent.textContent = formatYtmTime(parseFloat(e.target.value) || 0);
+      }
+    });
+    ytmSeekBar.addEventListener("change", (e) => {
+      const seekTime = parseFloat(e.target.value) || 0;
+      isScrubbingYtm = false;
+      ext.runtime.sendMessage({ action: "ytm_control", command: "seek", time: seekTime });
     });
   }
 
@@ -1407,48 +1450,71 @@
   });
 
   // =========================================================================
-  // 9. QUICK LINKS FROM HISTORY
+  // 9. QUICK LINKS FROM HISTORY (Always 6 Slots - Full 2x3 Grid)
   // =========================================================================
   const historyContainer = document.getElementById("history-container");
+
+  const DEFAULT_HISTORY = [
+    { title: "YouTube Music", url: "https://music.youtube.com" },
+    { title: "GitHub", url: "https://github.com" },
+    { title: "Hacker News", url: "https://news.ycombinator.com" },
+    { title: "DuckDuckGo", url: "https://duckduckgo.com" },
+    { title: "Ars Technica", url: "https://arstechnica.com" },
+    { title: "Mozilla Developer", url: "https://developer.mozilla.org" }
+  ];
+
+  function appendHistoryCard(item) {
+    if (!historyContainer) return;
+    const card = document.createElement("a");
+    card.className = "history-card";
+    card.href = item.url;
+    const domain = getDomain(item.url);
+    const favicon = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+
+    card.innerHTML = `
+      <img src="${favicon}" alt="" onerror="this.style.display='none'">
+      <div class="history-text">
+        <span class="history-title">${item.title || domain}</span>
+        <span class="history-domain">${domain}</span>
+      </div>
+    `;
+    historyContainer.appendChild(card);
+  }
 
   function renderHistoryLinks() {
     if (!historyContainer) return;
 
     if (chrome.history && chrome.history.search) {
-      chrome.history.search({ text: "", maxResults: 14 }, (results) => {
-        if (!results || results.length === 0) {
-          renderFallbackHistory();
-          return;
-        }
-
+      chrome.history.search({ text: "", maxResults: 60 }, (results) => {
         historyContainer.innerHTML = "";
         const seenDomains = new Set();
         let added = 0;
 
-        for (const item of results) {
-          if (!item.url || item.url.startsWith("about:") || item.url.startsWith("chrome-extension:")) continue;
-          const domain = getDomain(item.url);
-          if (seenDomains.has(domain)) continue;
-          seenDomains.add(domain);
+        if (results && results.length > 0) {
+          for (const item of results) {
+            if (!item.url || item.url.startsWith("about:") || item.url.startsWith("chrome-extension:")) continue;
+            const domain = getDomain(item.url);
+            if (seenDomains.has(domain)) continue;
+            seenDomains.add(domain);
 
-          const card = document.createElement("a");
-          card.className = "history-card";
-          card.href = item.url;
-          const favicon = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
-
-          card.innerHTML = `
-            <img src="${favicon}" alt="" onerror="this.style.display='none'">
-            <div class="history-text">
-              <span class="history-title">${item.title || domain}</span>
-              <span class="history-domain">${domain}</span>
-            </div>
-          `;
-          historyContainer.appendChild(card);
-          added++;
-          if (added >= 6) break;
+            appendHistoryCard(item);
+            added++;
+            if (added >= 6) break;
+          }
         }
 
-        if (added === 0) renderFallbackHistory();
+        // Backfill remaining slots up to 6 from curated defaults so grid has 6 cards
+        if (added < 6) {
+          for (const fallback of DEFAULT_HISTORY) {
+            const fallbackDomain = getDomain(fallback.url);
+            if (!seenDomains.has(fallbackDomain)) {
+              seenDomains.add(fallbackDomain);
+              appendHistoryCard(fallback);
+              added++;
+              if (added >= 6) break;
+            }
+          }
+        }
       });
     } else {
       renderFallbackHistory();
@@ -1457,28 +1523,8 @@
 
   function renderFallbackHistory() {
     if (!historyContainer) return;
-    const defaults = [
-      { title: "Hacker News", url: "https://news.ycombinator.com" },
-      { title: "DuckDuckGo", url: "https://duckduckgo.com" },
-      { title: "Ars Technica", url: "https://arstechnica.com" },
-      { title: "Mozilla Developer", url: "https://developer.mozilla.org" }
-    ];
     historyContainer.innerHTML = "";
-    defaults.forEach(item => {
-      const card = document.createElement("a");
-      card.className = "history-card";
-      card.href = item.url;
-      const domain = getDomain(item.url);
-      const favicon = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
-      card.innerHTML = `
-        <img src="${favicon}" alt="" onerror="this.style.display='none'">
-        <div class="history-text">
-          <span class="history-title">${item.title}</span>
-          <span class="history-domain">${domain}</span>
-        </div>
-      `;
-      historyContainer.appendChild(card);
-    });
+    DEFAULT_HISTORY.forEach(item => appendHistoryCard(item));
   }
 
   renderHistoryLinks();
