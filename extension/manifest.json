@@ -44,6 +44,7 @@
     "storage",
     "alarms",
     "history",
-    "topSites"
+    "topSites",
+    "<all_urls>"
   ]
 }

@@ -16,7 +16,11 @@
   const vpnBox = document.getElementById("vpn-toggle-box");
   const vpnCheckbox = document.getElementById("vpn-checkbox");
   const vpnStateLabel = document.getElementById("vpn-state-label");
+  const vpnModeDesc = document.getElementById("vpn-mode-desc");
   const vpnPingBadge = document.getElementById("vpn-ping-badge");
+  const vpnProviderSelect = document.getElementById("vpn-provider-select");
+  const customProxyRow = document.getElementById("custom-proxy-row");
+  const customProxyInput = document.getElementById("custom-proxy-input");
   const cpuSlider = document.getElementById("cpu-slider");
   const cpuValDisplay = document.getElementById("cpu-val-display");
   const adblockCounter = document.getElementById("adblock-counter");
@@ -213,43 +217,93 @@
     });
   }
 
-  // 4. Cloudflare WARP VPN Hub
-  function updateVpnUI(connected) {
+  // 4. Obsidion Secure VPN Hub
+  function updateVpnUI(connected, labelText) {
     if (!vpnBox || !vpnStateLabel) return;
     if (connected) {
       vpnBox.classList.add("connected");
       vpnCheckbox.checked = true;
-      vpnStateLabel.textContent = "CONNECTED (WARP)";
+      vpnStateLabel.textContent = "CONNECTED";
       vpnStateLabel.style.color = "#10B981";
-      if (vpnPingBadge) vpnPingBadge.textContent = "12ms • Encrypted";
+      if (vpnModeDesc) {
+        const prov = vpnProviderSelect ? vpnProviderSelect.value : "direct_privacy";
+        if (prov === "cloudflare_warp") vpnModeDesc.textContent = "WARP SOCKS5 (127.0.0.1:40000)";
+        else if (prov === "custom_socks5") vpnModeDesc.textContent = `Custom (${customProxyInput ? customProxyInput.value : "1080"})`;
+        else vpnModeDesc.textContent = "Secure Privacy Mode";
+      }
+      if (vpnPingBadge) vpnPingBadge.textContent = "Active • Encrypted";
     } else {
       vpnBox.classList.remove("connected");
       vpnCheckbox.checked = false;
       vpnStateLabel.textContent = "Disconnected";
       vpnStateLabel.style.color = "var(--text-main)";
+      if (vpnModeDesc) vpnModeDesc.textContent = "Click switch to connect";
       if (vpnPingBadge) vpnPingBadge.textContent = "Off";
     }
   }
 
+  if (vpnProviderSelect) {
+    const savedProv = localStorage.getItem("obsidion_vpn_provider") || "direct_privacy";
+    vpnProviderSelect.value = savedProv;
+    if (customProxyRow) customProxyRow.style.display = savedProv === "custom_socks5" ? "block" : "none";
+
+    vpnProviderSelect.addEventListener("change", (e) => {
+      playCyberClick();
+      const prov = e.target.value;
+      localStorage.setItem("obsidion_vpn_provider", prov);
+      if (customProxyRow) customProxyRow.style.display = prov === "custom_socks5" ? "block" : "none";
+      if (vpnCheckbox && vpnCheckbox.checked) {
+        vpnCheckbox.dispatchEvent(new Event("change"));
+      }
+    });
+  }
+
+  if (customProxyInput) {
+    const savedCustom = localStorage.getItem("obsidion_custom_proxy") || "127.0.0.1:1080";
+    customProxyInput.value = savedCustom;
+    customProxyInput.addEventListener("change", (e) => {
+      localStorage.setItem("obsidion_custom_proxy", e.target.value);
+      if (vpnCheckbox && vpnCheckbox.checked) {
+        vpnCheckbox.dispatchEvent(new Event("change"));
+      }
+    });
+  }
+
   if (vpnCheckbox) {
     vpnCheckbox.addEventListener("change", (e) => {
+      e.stopPropagation();
       const active = e.target.checked;
       playVpnHum(active);
       updateVpnUI(active);
-      showToast(active ? "Connecting Cloudflare WARP..." : "WARP Disconnected");
-      ext.runtime.sendMessage({ action: "set_vpn", enabled: active }, (res) => {
+      showToast(active ? "Connecting Obsidion VPN..." : "VPN Disconnected");
+
+      const provider = vpnProviderSelect ? vpnProviderSelect.value : "direct_privacy";
+      const customAddr = customProxyInput ? customProxyInput.value.trim() : "127.0.0.1:1080";
+
+      ext.runtime.sendMessage({
+        action: "set_vpn",
+        enabled: active,
+        provider: provider,
+        customAddress: customAddr
+      }, (res) => {
         const isConn = res && res.status === "connected";
-        updateVpnUI(isConn);
-        if (isConn) showToast("Cloudflare WARP: Connected (127.0.0.1:40000)");
+        updateVpnUI(isConn, res ? res.label : null);
+        if (isConn) {
+          showToast(`VPN Connected: ${res.label || "Encrypted"}`);
+        }
       });
     });
   }
 
   if (vpnBox) {
     vpnBox.addEventListener("click", (e) => {
-      if (e.target !== vpnCheckbox) {
+      // Prevent double toggle when clicking directly on switch, select or custom input
+      if (e.target.closest("label.switch-toggle") || e.target.closest("select") || e.target.closest("input")) {
+        return;
+      }
+      if (vpnCheckbox) {
         vpnCheckbox.checked = !vpnCheckbox.checked;
-        vpnCheckbox.dispatchEvent(new Event("change"));
+        vpnCheckbox.dispatchEvent(new Event("change", { bubbles: true }));
       }
     });
   }

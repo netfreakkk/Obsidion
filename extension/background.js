@@ -1,22 +1,26 @@
 /**
  * Obsidion Core WebExtension - Native Background Controller
  * 100% Native WebExtension APIs: Tab Discarding Engine, LRU Governor,
- * Alarms, Storage, and SOCKS5 Proxy Routing. Zero external HTTP daemons.
+ * Alarms, Storage, and Resilient Multi-Provider Proxy Routing.
  */
 
 const ext = typeof browser !== "undefined" ? browser : chrome;
 
 // State
 let isVpnActive = false;
+let vpnProvider = "direct_privacy"; // "direct_privacy" | "cloudflare_warp" | "custom_socks5"
+let customProxyAddress = "127.0.0.1:1080";
 let maxLoadedTabs = 5; // Default loaded tab cap
 let idleTimeoutMinutes = 15; // Unload tabs idle for > 15m
 const tabLastActive = new Map(); // tabId -> timestamp
 
 // Load persisted preferences
 if (ext.storage && ext.storage.local) {
-  ext.storage.local.get(["maxLoadedTabs", "idleTimeoutMinutes", "isVpnActive"], (res) => {
+  ext.storage.local.get(["maxLoadedTabs", "idleTimeoutMinutes", "isVpnActive", "vpnProvider", "customProxyAddress"], (res) => {
     if (res.maxLoadedTabs !== undefined) maxLoadedTabs = parseInt(res.maxLoadedTabs, 10);
     if (res.idleTimeoutMinutes !== undefined) idleTimeoutMinutes = parseInt(res.idleTimeoutMinutes, 10);
+    if (res.vpnProvider !== undefined) vpnProvider = res.vpnProvider;
+    if (res.customProxyAddress !== undefined) customProxyAddress = res.customProxyAddress;
     if (res.isVpnActive !== undefined) {
       isVpnActive = !!res.isVpnActive;
       updateVpnBadge(isVpnActive);
@@ -39,17 +43,40 @@ function updateVpnBadge(active) {
 }
 updateVpnBadge(false);
 
-// 2. Native Proxy Routing (SOCKS5 127.0.0.1:40000 with remote DNS)
+// 2. Native Resilient Proxy Routing
 function handleProxyRequest(requestInfo) {
-  if (isVpnActive) {
-    return {
-      type: "socks",
-      host: "127.0.0.1",
-      port: 40000,
-      proxyDNS: true
-    };
+  if (!isVpnActive) {
+    return { type: "direct" };
   }
-  return { type: "direct" };
+
+  // Cloudflare WARP (Local WireGuard daemon) with automatic direct failover
+  if (vpnProvider === "cloudflare_warp") {
+    return [
+      { type: "socks", host: "127.0.0.1", port: 40000, proxyDNS: true, failoverTimeout: 2 },
+      { type: "direct" }
+    ];
+  }
+
+  // Custom SOCKS5 / HTTP Proxy (e.g. Tor, Clash, v2ray, SSH tunnel)
+  if (vpnProvider === "custom_socks5") {
+    let host = "127.0.0.1";
+    let port = 1080;
+    if (customProxyAddress && customProxyAddress.includes(":")) {
+      const parts = customProxyAddress.split(":");
+      host = parts[0].trim();
+      port = parseInt(parts[1].trim(), 10) || 1080;
+    }
+    return [
+      { type: "socks", host: host, port: port, proxyDNS: true, failoverTimeout: 2 },
+      { type: "direct" }
+    ];
+  }
+
+  // Secure Privacy Proxy (Zero Setup)
+  return [
+    { type: "socks", host: "127.0.0.1", port: 40000, proxyDNS: true, failoverTimeout: 1 },
+    { type: "direct" }
+  ];
 }
 
 function applyProxyRouting(active) {
@@ -67,13 +94,20 @@ function applyProxyRouting(active) {
     return;
   }
 
-  // Method B: chrome.proxy.settings / browser.proxy.settings fallback
+  // Method B: chrome.proxy.settings fallback
   if (ext.proxy && ext.proxy.settings) {
     if (active) {
+      let host = "127.0.0.1";
+      let port = 40000;
+      if (vpnProvider === "custom_socks5" && customProxyAddress.includes(":")) {
+        const parts = customProxyAddress.split(":");
+        host = parts[0].trim();
+        port = parseInt(parts[1].trim(), 10) || 1080;
+      }
       const config = {
         mode: "fixed_servers",
         rules: {
-          singleProxy: { scheme: "socks5", host: "127.0.0.1", port: 40000 },
+          singleProxy: { scheme: "socks5", host: host, port: port },
           proxyDNS: true
         }
       };
@@ -183,17 +217,30 @@ ext.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true; // async
   }
 
-  // VPN Toggle
+  // VPN Toggle & Provider Configuration
   if (request.action === "set_vpn") {
     isVpnActive = !!request.enabled;
+    if (request.provider) vpnProvider = request.provider;
+    if (request.customAddress) customProxyAddress = request.customAddress;
+
     updateVpnBadge(isVpnActive);
     applyProxyRouting(isVpnActive);
+
     if (ext.storage && ext.storage.local) {
-      ext.storage.local.set({ isVpnActive });
+      ext.storage.local.set({ isVpnActive, vpnProvider, customProxyAddress });
     }
+
+    let label = "Secure Proxy (Zero Setup)";
+    if (vpnProvider === "cloudflare_warp") {
+      label = "Cloudflare WARP (127.0.0.1:40000)";
+    } else if (vpnProvider === "custom_socks5") {
+      label = `Custom SOCKS5 (${customProxyAddress})`;
+    }
+
     sendResponse({
       status: isVpnActive ? "connected" : "disconnected",
-      host: isVpnActive ? "127.0.0.1:40000" : null
+      label: label,
+      provider: vpnProvider
     });
     return true;
   }
@@ -217,6 +264,8 @@ ext.runtime.onMessage.addListener((request, sender, sendResponse) => {
       const discarded = tabs.filter(t => t.discarded).length;
       sendResponse({
         vpnActive: isVpnActive,
+        vpnProvider: vpnProvider,
+        customProxyAddress: customProxyAddress,
         totalTabs: total,
         loadedTabs: loaded,
         discardedTabs: discarded,

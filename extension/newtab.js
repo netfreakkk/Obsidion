@@ -393,6 +393,31 @@
   }
   updateWpFilters(savedBlur, savedBright);
 
+  // Restore Tile Glass Transparency (85% default sheer glass)
+  const glassTransparencySlider = document.getElementById("glass-transparency-slider");
+  const glassTransparencyVal = document.getElementById("glass-transparency-val");
+  const savedGlassTrans = localStorage.getItem("obsidion_glass_transparency") || "85";
+
+  function applyGlassTransparency(percent) {
+    const p = Math.max(5, Math.min(95, parseInt(percent, 10) || 85));
+    const opacity = ((100 - p) / 100).toFixed(2);
+    document.documentElement.style.setProperty("--glass-opacity", opacity);
+    if (glassTransparencyVal) glassTransparencyVal.textContent = `${p}% Transparent`;
+    if (glassTransparencySlider) glassTransparencySlider.value = p;
+  }
+  applyGlassTransparency(savedGlassTrans);
+
+  if (glassTransparencySlider) {
+    glassTransparencySlider.addEventListener("input", (e) => {
+      applyGlassTransparency(e.target.value);
+    });
+    glassTransparencySlider.addEventListener("change", (e) => {
+      localStorage.setItem("obsidion_glass_transparency", e.target.value);
+      playCyberClick();
+      showToast(`Tile Glass Transparency: ${e.target.value}%`);
+    });
+  }
+
   // =========================================================================
   // 3. WALLPAPER ENGINE MODAL & PRESETS
   // =========================================================================
@@ -546,7 +571,11 @@
   const vpnToggleBox = document.getElementById("vpn-toggle-box");
   const vpnCheckbox = document.getElementById("vpn-checkbox");
   const vpnStateLabel = document.getElementById("vpn-state-label");
+  const vpnModeDesc = document.getElementById("vpn-mode-desc");
   const vpnPingBadge = document.getElementById("vpn-ping-badge");
+  const vpnProviderSelect = document.getElementById("vpn-provider-select");
+  const customProxyRow = document.getElementById("custom-proxy-row");
+  const customProxyInput = document.getElementById("custom-proxy-input");
   const cpuSlider = document.getElementById("cpu-slider");
   const cpuValDisplay = document.getElementById("cpu-val-display");
   const adblockCounter = document.getElementById("adblock-counter");
@@ -642,18 +671,24 @@
     });
   }
 
-  // Cloudflare WARP VPN Controller
-  function updateVpnState(active) {
+  // Obsidion Secure VPN Controller
+  function updateVpnState(active, labelText) {
     if (vpnCheckbox) vpnCheckbox.checked = active;
     if (vpnToggleBox) {
       if (active) {
         vpnToggleBox.classList.add("connected");
         if (vpnStateLabel) {
-          vpnStateLabel.textContent = "WARP Active";
+          vpnStateLabel.textContent = "CONNECTED";
           vpnStateLabel.style.color = "#10B981";
         }
+        if (vpnModeDesc) {
+          const prov = vpnProviderSelect ? vpnProviderSelect.value : "direct_privacy";
+          if (prov === "cloudflare_warp") vpnModeDesc.textContent = "WARP SOCKS5 (127.0.0.1:40000)";
+          else if (prov === "custom_socks5") vpnModeDesc.textContent = `Custom (${customProxyInput ? customProxyInput.value : "1080"})`;
+          else vpnModeDesc.textContent = "Secure Privacy Mode";
+        }
         if (vpnPingBadge) {
-          vpnPingBadge.textContent = "12ms • Encrypted";
+          vpnPingBadge.textContent = "Active • Encrypted";
           vpnPingBadge.style.color = "#10B981";
         }
       } else {
@@ -661,6 +696,9 @@
         if (vpnStateLabel) {
           vpnStateLabel.textContent = "Disconnected";
           vpnStateLabel.style.color = "var(--text)";
+        }
+        if (vpnModeDesc) {
+          vpnModeDesc.textContent = "Click switch to connect";
         }
         if (vpnPingBadge) {
           vpnPingBadge.textContent = "Off";
@@ -670,25 +708,68 @@
     }
   }
 
+  if (vpnProviderSelect) {
+    const savedProv = localStorage.getItem("obsidion_vpn_provider") || "direct_privacy";
+    vpnProviderSelect.value = savedProv;
+    if (customProxyRow) customProxyRow.style.display = savedProv === "custom_socks5" ? "block" : "none";
+
+    vpnProviderSelect.addEventListener("change", (e) => {
+      playCyberClick();
+      const prov = e.target.value;
+      localStorage.setItem("obsidion_vpn_provider", prov);
+      if (customProxyRow) customProxyRow.style.display = prov === "custom_socks5" ? "block" : "none";
+      if (vpnCheckbox && vpnCheckbox.checked) {
+        vpnCheckbox.dispatchEvent(new Event("change"));
+      }
+    });
+  }
+
+  if (customProxyInput) {
+    const savedCustom = localStorage.getItem("obsidion_custom_proxy") || "127.0.0.1:1080";
+    customProxyInput.value = savedCustom;
+    customProxyInput.addEventListener("change", (e) => {
+      localStorage.setItem("obsidion_custom_proxy", e.target.value);
+      if (vpnCheckbox && vpnCheckbox.checked) {
+        vpnCheckbox.dispatchEvent(new Event("change"));
+      }
+    });
+  }
+
   if (vpnCheckbox) {
     vpnCheckbox.addEventListener("change", (e) => {
-      const active = e.target.checked;
+      e.stopPropagation();
+      const active = vpnCheckbox.checked;
       playVpnHum(active);
       updateVpnState(active);
-      showToast(active ? "Connecting Cloudflare WARP..." : "WARP Disconnected");
-      ext.runtime.sendMessage({ action: "set_vpn", enabled: active }, (res) => {
+      showToast(active ? "Connecting Obsidion VPN..." : "VPN Disconnected");
+
+      const provider = vpnProviderSelect ? vpnProviderSelect.value : "direct_privacy";
+      const customAddr = customProxyInput ? customProxyInput.value.trim() : "127.0.0.1:1080";
+
+      ext.runtime.sendMessage({
+        action: "set_vpn",
+        enabled: active,
+        provider: provider,
+        customAddress: customAddr
+      }, (res) => {
         const isConn = res && res.status === "connected";
-        updateVpnState(isConn);
-        if (isConn) showToast("WARP VPN Connected (127.0.0.1:40000)");
+        updateVpnState(isConn, res ? res.label : null);
+        if (isConn) {
+          showToast(`VPN Connected: ${res.label || "Encrypted"}`);
+        }
       });
     });
   }
 
   if (vpnToggleBox) {
     vpnToggleBox.addEventListener("click", (e) => {
-      if (e.target !== vpnCheckbox) {
+      // Prevent double toggle when clicking directly on the switch label, select, or input
+      if (e.target.closest("label.switch-toggle") || e.target.closest("select") || e.target.closest("input")) {
+        return;
+      }
+      if (vpnCheckbox) {
         vpnCheckbox.checked = !vpnCheckbox.checked;
-        vpnCheckbox.dispatchEvent(new Event("change"));
+        vpnCheckbox.dispatchEvent(new Event("change", { bubbles: true }));
       }
     });
   }

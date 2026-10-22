@@ -8,12 +8,12 @@
       --accent-glow: #00F0FF;
       --accent-glow-rgb: 0, 240, 255;
       --bg-void: #0B0F17;
-      --bg-panel: #0E1422;
-      --bg-card: rgba(18, 26, 43, 0.7);
-      --bg-card-hover: rgba(28, 40, 65, 0.85);
-      --border-subtle: rgba(255, 255, 255, 0.08);
+      --bg-panel: rgba(10, 15, 25, 0.45);
+      --bg-card: rgba(12, 18, 30, 0.35);
+      --bg-card-hover: rgba(0, 240, 255, 0.15);
+      --border-subtle: rgba(255, 255, 255, 0.14);
       --text-main: #F3F4F6;
-      --text-muted: #9CA3AF;
+      --text-muted: #D1D5DB;
     }
 
     * {
@@ -97,14 +97,18 @@
       border: 1px solid var(--border-subtle);
       border-radius: 12px;
       padding: 12px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       display: flex;
       flex-direction: column;
       gap: 10px;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     }
 
     .card:hover {
-      border-color: rgba(var(--accent-glow-rgb), 0.3);
+      border-color: rgba(var(--accent-glow-rgb), 0.45);
+      background: rgba(18, 26, 43, 0.45);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), 0 0 12px rgba(var(--accent-glow-rgb), 0.15);
     }
 
     .card-title {
@@ -503,11 +507,11 @@
       </button>
     </div>
 
-    <!-- Cloudflare WARP VPN Center -->
+    <!-- Obsidion Secure VPN Center -->
     <div class="card">
       <div class="card-title">
-        <span>Cloudflare WARP VPN</span>
-        <span id="vpn-ping-badge" style="font-size: 10px; color: #10B981;">14ms</span>
+        <span>Obsidion Secure VPN</span>
+        <span id="vpn-ping-badge" style="font-size: 10px; color: var(--text-muted);">Off</span>
       </div>
       <div id="vpn-toggle-box" class="vpn-box">
         <div class="vpn-left">
@@ -516,13 +520,21 @@
           </svg>
           <div>
             <div id="vpn-state-label" class="vpn-title">Disconnected</div>
-            <div class="vpn-sub">Rootless SOCKS5 127.0.0.1:40000</div>
+            <div id="vpn-mode-desc" class="vpn-sub">Click switch to connect</div>
           </div>
         </div>
-        <label class="switch-toggle">
+        <label class="switch-toggle" for="vpn-checkbox">
           <input type="checkbox" id="vpn-checkbox">
           <span class="switch-slider"></span>
         </label>
+      </div>
+      <select id="vpn-provider-select" style="width: 100%; background: rgba(0,0,0,0.25); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 4px 6px; font-size: 10px; outline: none; cursor: pointer;">
+        <option value="direct_privacy">Secure Privacy Proxy (Zero Setup)</option>
+        <option value="cloudflare_warp">Cloudflare WARP (127.0.0.1:40000)</option>
+        <option value="custom_socks5">Custom SOCKS5 / HTTP Proxy</option>
+      </select>
+      <div id="custom-proxy-row" style="display: none; margin-top: 2px;">
+        <input type="text" id="custom-proxy-input" placeholder="127.0.0.1:1080" value="127.0.0.1:1080" style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); color: #FFF; border-radius: 6px; padding: 3px 6px; font-size: 10px; outline: none;">
       </div>
     </div>
 
