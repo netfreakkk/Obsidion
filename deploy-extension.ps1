@@ -13,6 +13,7 @@ Move-Item -Force $zipPath $xpiPath
 Write-Host "Package created: $xpiPath ($((Get-Item $xpiPath).Length) bytes)"
 
 $profiles = @(
+    "C:\Users\soura\AppData\Roaming\Mozilla\Firefox\Profiles\6v2gnnxj.default-unofficial-1792497456728",
     "C:\Users\soura\AppData\Roaming\Mozilla\Firefox\Profiles\7he3raj1.default-unofficial",
     "C:\Users\soura\AppData\Roaming\Mozilla\Firefox\Profiles\7mdlguz2.default-release"
 )

@@ -1450,7 +1450,7 @@
   });
 
   // =========================================================================
-  // 9. QUICK LINKS FROM HISTORY (Always 6 Slots - Full 2x3 Grid)
+  // 9. QUICK LINKS FROM HISTORY (Guaranteed Exactly 6 Recent Pages - 2x3 Grid)
   // =========================================================================
   const historyContainer = document.getElementById("history-container");
 
@@ -1463,16 +1463,26 @@
     { title: "Mozilla Developer", url: "https://developer.mozilla.org" }
   ];
 
+  function getCleanPageUrl(rawUrl) {
+    try {
+      const u = new URL(rawUrl);
+      return (u.origin + u.pathname + (u.search || "")).replace(/\/$/, "");
+    } catch {
+      return rawUrl;
+    }
+  }
+
   function appendHistoryCard(item) {
     if (!historyContainer) return;
     const card = document.createElement("a");
     card.className = "history-card";
     card.href = item.url;
+    card.title = `${item.title || "Page"} (${item.url})`;
     const domain = getDomain(item.url);
     const favicon = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
 
     card.innerHTML = `
-      <img src="${favicon}" alt="" onerror="this.style.display='none'">
+      <img src="${favicon}" alt="" onerror="this.src='icon-16.png'">
       <div class="history-text">
         <span class="history-title">${item.title || domain}</span>
         <span class="history-domain">${domain}</span>
@@ -1485,17 +1495,20 @@
     if (!historyContainer) return;
 
     if (chrome.history && chrome.history.search) {
-      chrome.history.search({ text: "", maxResults: 60 }, (results) => {
+      chrome.history.search({ text: "", maxResults: 100 }, (results) => {
         historyContainer.innerHTML = "";
-        const seenDomains = new Set();
+        const seenUrls = new Set();
+        const seenTitles = new Set();
         let added = 0;
 
         if (results && results.length > 0) {
           for (const item of results) {
-            if (!item.url || item.url.startsWith("about:") || item.url.startsWith("chrome-extension:")) continue;
-            const domain = getDomain(item.url);
-            if (seenDomains.has(domain)) continue;
-            seenDomains.add(domain);
+            if (!item.url || item.url.startsWith("about:") || item.url.startsWith("chrome-extension:") || item.url.startsWith("moz-extension:")) continue;
+            const cleanUrl = getCleanPageUrl(item.url);
+            const cleanTitle = (item.title || "").trim().toLowerCase();
+            if (seenUrls.has(cleanUrl) || (cleanTitle && seenTitles.has(cleanTitle))) continue;
+            seenUrls.add(cleanUrl);
+            if (cleanTitle) seenTitles.add(cleanTitle);
 
             appendHistoryCard(item);
             added++;
@@ -1503,12 +1516,12 @@
           }
         }
 
-        // Backfill remaining slots up to 6 from curated defaults so grid has 6 cards
+        // Guaranteed 6 slots: If user has fewer than 6 history entries, backfill from curated fallbacks
         if (added < 6) {
           for (const fallback of DEFAULT_HISTORY) {
-            const fallbackDomain = getDomain(fallback.url);
-            if (!seenDomains.has(fallbackDomain)) {
-              seenDomains.add(fallbackDomain);
+            const cleanFallback = getCleanPageUrl(fallback.url);
+            if (!seenUrls.has(cleanFallback)) {
+              seenUrls.add(cleanFallback);
               appendHistoryCard(fallback);
               added++;
               if (added >= 6) break;
