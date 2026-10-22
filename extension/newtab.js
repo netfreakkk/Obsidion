@@ -393,20 +393,19 @@
   }
   updateWpFilters(savedBlur, savedBright);
 
-  // Restore Tile Glass Transparency (OriginOS 7 / iOS Liquid Glass: 50% default)
+  // Restore Tile Glass Transparency (Ultra-sheer real-time liquid glass: 88% default)
   const glassTransparencySlider = document.getElementById("glass-transparency-slider");
   const glassTransparencyVal = document.getElementById("glass-transparency-val");
-  // Check migration version so old bugged 85% transparent doesn't wash out text
-  const glassVersion = localStorage.getItem("obsidion_glass_v2");
+  const glassVersion = localStorage.getItem("obsidion_glass_v4");
   let savedGlassTrans = localStorage.getItem("obsidion_glass_transparency");
-  if (!glassVersion || !savedGlassTrans || savedGlassTrans === "85") {
-    savedGlassTrans = "50";
-    localStorage.setItem("obsidion_glass_v2", "true");
-    localStorage.setItem("obsidion_glass_transparency", "50");
+  if (!glassVersion || !savedGlassTrans || savedGlassTrans === "50") {
+    savedGlassTrans = "88";
+    localStorage.setItem("obsidion_glass_v4", "true");
+    localStorage.setItem("obsidion_glass_transparency", "88");
   }
 
   function applyGlassTransparency(percent) {
-    const p = Math.max(5, Math.min(95, parseInt(percent, 10) || 50));
+    const p = Math.max(5, Math.min(95, parseInt(percent, 10) || 88));
     const opacity = ((100 - p) / 100).toFixed(2);
     document.documentElement.style.setProperty("--glass-opacity", opacity);
     if (glassTransparencyVal) glassTransparencyVal.textContent = `${p}% Transparent`;

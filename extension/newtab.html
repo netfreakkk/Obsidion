@@ -9,12 +9,12 @@
       --accent: #00F0FF;
       --accent-rgb: 0, 240, 255;
       --bg-dark: #0B0F17;
-      --glass-opacity: 0.52;
-      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 40%, rgba(0, 0, 0, 0.22) 100%), rgba(10, 16, 28, var(--glass-opacity));
+      --glass-opacity: 0.12;
+      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.03) 40%, rgba(0, 0, 0, 0.10) 100%), rgba(10, 16, 28, var(--glass-opacity));
       --glass-border: 1px solid rgba(255, 255, 255, 0.22);
-      --glass-shadow: 0 16px 36px 0 rgba(0, 0, 0, 0.40), inset 0 1px 1px 0 rgba(255, 255, 255, 0.60), inset 0 -1px 2px 0 rgba(0, 0, 0, 0.30);
+      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.45);
       --bg-surface: var(--glass-bg);
-      --bg-card: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 40%, rgba(0, 0, 0, 0.25) 100%), rgba(12, 18, 32, calc(var(--glass-opacity) * 0.95));
+      --bg-card: rgba(12, 18, 32, calc(var(--glass-opacity) * 0.85));
       --bg-card-hover: rgba(0, 240, 255, 0.20);
       --border: rgba(255, 255, 255, 0.20);
       --border-accent: rgba(0, 240, 255, 0.55);
@@ -91,7 +91,7 @@
       height: 100vh;
       z-index: 1;
       pointer-events: none;
-      background: radial-gradient(circle at center, rgba(11, 15, 23, 0.15) 0%, rgba(11, 15, 23, 0.35) 75%, rgba(11, 15, 23, 0.65) 100%);
+      background: radial-gradient(circle at center, transparent 72%, rgba(11, 15, 23, 0.28) 100%);
     }
 
     /* 2. Top Header Bar - OriginOS 7 Liquid Sheen */
@@ -390,7 +390,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: rgba(0, 0, 0, 0.45);
+      background: rgba(0, 0, 0, 0.35);
       border: 1px solid rgba(255, 255, 255, 0.18);
       border-radius: 10px;
       padding: 10px 12px;
@@ -404,48 +404,58 @@
       background: rgba(16, 185, 129, 0.2);
       box-shadow: 0 0 16px rgba(16, 185, 129, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3);
     }
-      box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);
-    }
 
     .switch-toggle {
-      position: relative;
-      width: 36px;
-      height: 20px;
+      position: relative !important;
+      display: inline-block !important;
+      width: 38px !important;
+      height: 20px !important;
+      flex-shrink: 0 !important;
+      cursor: pointer !important;
     }
 
     .switch-toggle input {
-      opacity: 0;
-      width: 0;
-      height: 0;
+      opacity: 0 !important;
+      width: 0 !important;
+      height: 0 !important;
+      margin: 0 !important;
+      position: absolute !important;
     }
 
     .switch-slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: #374151;
-      border-radius: 20px;
-      transition: 0.2s;
+      position: absolute !important;
+      cursor: pointer !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      background: rgba(255, 255, 255, 0.2) !important;
+      border: 1px solid rgba(255, 255, 255, 0.24) !important;
+      border-radius: 20px !important;
+      transition: all 0.25s ease !important;
     }
 
     .switch-slider:before {
-      position: absolute;
-      content: "";
-      height: 14px;
-      width: 14px;
-      left: 3px;
-      bottom: 3px;
-      background: white;
-      border-radius: 50%;
-      transition: 0.2s;
+      position: absolute !important;
+      content: "" !important;
+      height: 14px !important;
+      width: 14px !important;
+      left: 2px !important;
+      bottom: 2px !important;
+      background: #FFFFFF !important;
+      border-radius: 50% !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
     input:checked + .switch-slider {
-      background: #10B981;
+      background: #10B981 !important;
+      border-color: #10B981 !important;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.5) !important;
     }
 
     input:checked + .switch-slider:before {
-      transform: translateX(16px);
+      transform: translateX(18px) !important;
     }
 
     /* Accent Palette */
@@ -1050,30 +1060,32 @@
       color: #E2E8F0;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
     }
-      font-size: 10px;
-      color: var(--text-dim);
-    }
 
-    /* 6. MODAL DIALOGS (using modern <dialog closedby="any">) */
+    /* 6. MODAL DIALOGS (Centered, Dark Frosted Glass, High-Contrast) */
     dialog {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(14, 20, 34, 0.95);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      color: var(--text);
-      max-width: 480px;
-      width: 90%;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-      background-color: #0E1422;
-      z-index: 100;
+      position: fixed !important;
+      inset: 0 !important;
+      margin: auto !important;
+      background: rgba(13, 19, 33, 0.96) !important;
+      border: 1px solid rgba(255, 255, 255, 0.22) !important;
+      border-radius: 18px !important;
+      padding: 24px !important;
+      color: #FFFFFF !important;
+      max-width: 480px !important;
+      width: 90% !important;
+      height: fit-content !important;
+      max-height: 85vh !important;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85) !important;
+      backdrop-filter: blur(24px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+      z-index: 1000 !important;
+      overflow-y: auto !important;
     }
 
     dialog::backdrop {
-      background-color: rgba(0, 0, 0, 0.75);
+      background: rgba(0, 0, 0, 0.75) !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
     }
 
     .modal-header {
@@ -1107,8 +1119,8 @@
     .modal-input {
       width: 100%;
       padding: 10px 14px;
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 8px;
       color: #FFFFFF;
       font-size: 13px;
@@ -1118,7 +1130,7 @@
 
     .modal-input:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.3);
+      box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.4);
     }
 
     .city-results-list {
@@ -1131,8 +1143,8 @@
     }
 
     .city-item {
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.16);
       border-radius: 6px;
       padding: 8px 12px;
       font-size: 12px;
@@ -1144,36 +1156,42 @@
     }
 
     .city-item:hover {
-      background: rgba(var(--accent-rgb), 0.15);
+      background: rgba(var(--accent-rgb), 0.2);
       border-color: var(--accent);
-      color: var(--accent);
+      color: #FFFFFF;
     }
 
     .wallpaper-preset-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 16px;
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 10px !important;
+      margin-bottom: 16px !important;
     }
 
     .wallpaper-chip {
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-      font-size: 11px;
-      font-weight: 600;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.15s ease;
+      background: rgba(255, 255, 255, 0.08) !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      border-radius: 8px !important;
+      padding: 10px !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      color: #FFFFFF !important;
+      text-align: center !important;
+      cursor: pointer !important;
+      transition: all 0.15s ease !important;
     }
 
-    .wallpaper-chip.active,
     .wallpaper-chip:hover {
-      background: rgba(var(--accent-rgb), 0.18);
-      border-color: var(--accent);
-      color: var(--accent);
-      box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.3);
+      background: rgba(var(--accent-rgb), 0.2) !important;
+      border-color: var(--accent) !important;
+      color: #FFFFFF !important;
+    }
+
+    .wallpaper-chip.active {
+      background: rgba(var(--accent-rgb), 0.25) !important;
+      border-color: var(--accent) !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.4) !important;
     }
 
     /* Toast */
@@ -1299,17 +1317,17 @@
       <!-- Obsidion Secure VPN Center -->
       <div class="dock-card">
         <div class="dock-card-header">
-          <span>Obsidion Secure VPN</span>
-          <span id="vpn-ping-badge" style="font-size: 10px; color: var(--text-dim);">Off</span>
+          <span style="color: #FFFFFF; font-weight: 800;">Obsidion Secure VPN</span>
+          <span id="vpn-ping-badge" style="font-size: 10px; color: #E2E8F0; font-weight: 700;">Off</span>
         </div>
         <div id="vpn-toggle-box" class="vpn-box">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent);">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
             </svg>
             <div>
-              <div id="vpn-state-label" style="font-size: 11px; font-weight: 700; color: var(--text);">Disconnected</div>
-              <div id="vpn-mode-desc" style="font-size: 9px; color: var(--text-dim);">Click switch to connect</div>
+              <div id="vpn-state-label" style="font-size: 11px; font-weight: 800; color: #FFFFFF; text-shadow: 0 1px 2px rgba(0,0,0,0.9);">Disconnected</div>
+              <div id="vpn-mode-desc" style="font-size: 9px; color: #E2E8F0; text-shadow: 0 1px 2px rgba(0,0,0,0.85);">Click switch to connect</div>
             </div>
           </div>
           <label class="switch-toggle" for="vpn-checkbox">
@@ -1317,14 +1335,14 @@
             <span class="switch-slider"></span>
           </label>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 2px;">
-          <select id="vpn-provider-select" style="width: 100%; background: rgba(0,0,0,0.25); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 4px 6px; font-size: 10px; outline: none; cursor: pointer;">
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+          <select id="vpn-provider-select" style="width: 100%; background: #141C2E; border: 1px solid rgba(255,255,255,0.22); color: #FFFFFF; border-radius: 6px; padding: 6px 8px; font-size: 10px; font-weight: 700; outline: none; cursor: pointer;">
             <option value="direct_privacy">Secure Privacy Proxy (Zero Setup)</option>
             <option value="cloudflare_warp">Cloudflare WARP (127.0.0.1:40000)</option>
             <option value="custom_socks5">Custom SOCKS5 / HTTP Proxy</option>
           </select>
           <div id="custom-proxy-row" style="display: none; margin-top: 2px;">
-            <input type="text" id="custom-proxy-input" placeholder="127.0.0.1:1080" value="127.0.0.1:1080" style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: #FFF; border-radius: 6px; padding: 4px 6px; font-size: 10px; outline: none;">
+            <input type="text" id="custom-proxy-input" placeholder="127.0.0.1:1080" value="127.0.0.1:1080" style="width: 100%; background: #0E1422; border: 1px solid rgba(255,255,255,0.22); color: #FFF; border-radius: 6px; padding: 6px 8px; font-size: 10px; outline: none;">
           </div>
         </div>
       </div>
@@ -1555,10 +1573,10 @@
     <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);">
       <div class="slider-labels" style="margin-bottom: 4px;">
         <span>Tile Glass Transparency</span>
-        <span id="glass-transparency-val">50% Transparent</span>
+        <span id="glass-transparency-val">88% Transparent</span>
       </div>
-      <input type="range" id="glass-transparency-slider" min="5" max="95" step="5" value="50" style="width: 100%;">
-      <div style="font-size: 10px; color: var(--text-dim); margin-top: 4px;">OriginOS 7 / iOS Liquid Glass: balances wallpaper pass-through with 100% text legibility.</div>
+      <input type="range" id="glass-transparency-slider" min="5" max="95" step="5" value="88" style="width: 100%;">
+      <div style="font-size: 10px; color: var(--text-dim); margin-top: 4px;">Real-Time Liquid Glass: your wallpaper video shines through completely while text stays sharp.</div>
     </div>
   </dialog>
 
