@@ -593,6 +593,7 @@
   const ytmThumbnail = document.getElementById("ytm-thumbnail");
   const ytmTrackTitle = document.getElementById("ytm-track-title");
   const ytmTrackArtist = document.getElementById("ytm-track-artist");
+  const ytmStatusPill = document.getElementById("ytm-status-pill");
   const ytmVolumeSlider = document.getElementById("ytm-volume-slider");
   const colorChips = document.querySelectorAll(".color-chip");
   const accentName = document.getElementById("accent-name");
@@ -860,6 +861,18 @@
       ytmVolumeSlider.value = state.volume;
     }
     ytmIsPlaying = !!state.isPlaying;
+    if (ytmStatusPill) {
+      if (ytmIsPlaying) {
+        ytmStatusPill.innerHTML = '<span style="width: 6px; height: 6px; border-radius: 50%; background: #10B981; display: inline-block;"></span> Playing';
+        ytmStatusPill.style.color = "#10B981";
+      } else if (state.hasTab) {
+        ytmStatusPill.innerHTML = '<span style="width: 6px; height: 6px; border-radius: 50%; background: #F59E0B; display: inline-block;"></span> Paused';
+        ytmStatusPill.style.color = "#F59E0B";
+      } else {
+        ytmStatusPill.innerHTML = '<span style="width: 6px; height: 6px; border-radius: 50%; background: #94A3B8; display: inline-block;"></span> Ready';
+        ytmStatusPill.style.color = "#94A3B8";
+      }
+    }
     if (ytmPlayIcon) {
       if (ytmIsPlaying) {
         ytmPlayIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';

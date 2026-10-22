@@ -10,14 +10,14 @@
       --accent-rgb: 0, 240, 255;
       --bg-dark: #0B0F17;
       --glass-opacity: 0.12;
-      --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.03) 40%, rgba(0, 0, 0, 0.10) 100%), rgba(10, 16, 28, var(--glass-opacity));
-      --glass-border: 1px solid rgba(255, 255, 255, 0.22);
-      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.45);
+      --glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.22) 100%), rgba(8, 12, 22, var(--glass-opacity));
+      --glass-border: 1px solid rgba(255, 255, 255, 0.12);
+      --glass-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.18);
       --bg-surface: var(--glass-bg);
-      --bg-card: rgba(12, 18, 32, calc(var(--glass-opacity) * 0.85));
-      --bg-card-hover: rgba(0, 240, 255, 0.20);
-      --border: rgba(255, 255, 255, 0.20);
-      --border-accent: rgba(0, 240, 255, 0.55);
+      --bg-card: rgba(8, 12, 22, var(--glass-opacity));
+      --bg-card-hover: rgba(var(--accent-rgb), 0.12);
+      --border: rgba(255, 255, 255, 0.12);
+      --border-accent: rgba(var(--accent-rgb), 0.70);
       --text: #FFFFFF;
       --text-dim: #E2E8F0;
       --text-muted: #CBD5E1;
@@ -103,10 +103,10 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      backdrop-filter: blur(28px) saturate(190%) contrast(105%);
-      -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%);
-      background: linear-gradient(180deg, rgba(10, 16, 28, 0.65) 0%, rgba(10, 16, 28, 0.20) 100%);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(12px) saturate(110%);
+      -webkit-backdrop-filter: blur(12px) saturate(110%);
+      background: rgba(8, 12, 22, 0.35);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.10);
     }
 
     .brand-logo {
@@ -118,13 +118,13 @@
       letter-spacing: 1.5px;
       text-transform: uppercase;
       color: #FFFFFF;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 14px rgba(var(--accent-rgb), 0.6);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
     }
 
     .brand-icon {
       width: 24px;
       height: 24px;
-      filter: drop-shadow(0 0 8px var(--accent));
+      filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.8));
     }
 
     .top-actions {
@@ -134,8 +134,8 @@
     }
 
     .glass-btn {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(0, 0, 0, 0.25) 100%), rgba(12, 18, 30, var(--glass-opacity));
-      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: rgba(15, 23, 42, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.14);
       color: #FFFFFF;
       padding: 7px 15px;
       border-radius: 20px;
@@ -145,18 +145,18 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      backdrop-filter: blur(28px) saturate(190%) contrast(105%);
-      -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.60);
+      backdrop-filter: blur(12px) saturate(110%);
+      -webkit-backdrop-filter: blur(12px) saturate(110%);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.20);
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .glass-btn:hover {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 50%, rgba(0, 0, 0, 0.2) 100%), rgba(var(--accent-rgb), 0.25);
-      border-color: var(--accent);
-      color: #FFFFFF;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 18px rgba(var(--accent-rgb), 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.75);
+      background: rgba(var(--accent-rgb), 0.16) !important;
+      border-color: var(--accent) !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(var(--accent-rgb), 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
       transform: translateY(-1px);
     }
 
@@ -197,18 +197,19 @@
       border: var(--glass-border);
       border-radius: var(--radius-md);
       padding: 14px;
-      backdrop-filter: blur(28px) saturate(190%) contrast(105%);
-      -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%);
+      backdrop-filter: blur(12px) saturate(110%);
+      -webkit-backdrop-filter: blur(12px) saturate(110%);
       box-shadow: var(--glass-shadow);
       display: flex;
       flex-direction: column;
       gap: 10px;
-      transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .dock-card:hover {
-      border-color: rgba(var(--accent-rgb), 0.55);
-      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45), 0 0 20px rgba(var(--accent-rgb), 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.7);
+      border-color: var(--accent) !important;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0.2) 100%), rgba(var(--accent-rgb), 0.12) !important;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(var(--accent-rgb), 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
     }
 
     .dock-card-header {
@@ -490,28 +491,61 @@
       box-shadow: 0 0 12px var(--accent);
     }
 
-    /* YouTube Music Player & Split Layout */
-    .weather-ytm-split-row {
-      display: grid;
-      grid-template-columns: 1fr 1.15fr;
-      gap: 12px;
-    }
-
-    @media (max-width: 768px) {
-      .weather-ytm-split-row {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .weather-compact-card,
-    .ytm-player-panel {
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: var(--radius-md);
-      padding: 12px;
+    /* Weather Dock Card */
+    .weather-dock-card {
       display: flex;
       flex-direction: column;
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2);
+      gap: 10px;
+    }
+
+    .weather-city-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #FFFFFF;
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .weather-city-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(var(--accent-rgb), 0.12);
+    }
+
+    .weather-unit-toggle {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #FFFFFF;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .weather-unit-toggle:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* YouTube Music Player Panel (Dashboard Left Column) */
+    .ytm-player-panel {
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      transition: all 0.25s ease;
     }
 
     .ytm-ctrl-btn {
@@ -519,8 +553,8 @@
       border: 1px solid rgba(255, 255, 255, 0.22);
       color: #FFFFFF;
       border-radius: 50%;
-      width: 26px;
-      height: 26px;
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -541,19 +575,19 @@
       border: 1px solid rgba(255, 255, 255, 0.35);
       color: #FFFFFF;
       border-radius: 50%;
-      width: 32px;
-      height: 32px;
+      width: 40px;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 0 12px rgba(255, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 14px rgba(255, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4);
       transition: all 0.15s ease;
     }
 
     .ytm-play-main-btn:hover {
       transform: scale(1.12);
-      box-shadow: 0 0 16px rgba(255, 0, 0, 0.65);
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
     }
 
     /* --- MAIN DASHBOARD AREA --- */
@@ -568,49 +602,48 @@
       width: 100%;
     }
 
-    /* Top Hero Clock - OriginOS 7 Floating Liquid Glass Island */
+    /* Top Hero Clock - Pure Clean Floating Text (No box covering watch) */
     .hero-section {
       display: inline-flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
-      gap: 6px;
-      margin-top: 6px;
-      padding: 16px 42px;
-      border-radius: 40px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 40%, rgba(0, 0, 0, 0.25) 100%), rgba(10, 16, 28, var(--glass-opacity));
-      backdrop-filter: blur(28px) saturate(190%) contrast(105%);
-      -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%);
-      border: 1px solid rgba(255, 255, 255, 0.24);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.65), inset 0 -1px 2px rgba(0, 0, 0, 0.30);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      gap: 4px;
+      margin-top: 10px;
+      margin-bottom: 6px;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      padding: 0 !important;
     }
 
     .clock-display {
-      font-size: 58px;
+      font-size: 64px;
       font-weight: 800;
       letter-spacing: 2px;
       color: #FFFFFF;
       font-variant-numeric: tabular-nums;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9), 0 0 24px rgba(var(--accent-rgb), 0.5);
+      text-shadow: 0 4px 16px rgba(0, 0, 0, 0.95), 0 2px 4px rgba(0, 0, 0, 0.9);
     }
 
     .date-display {
       font-size: 13px;
       font-weight: 700;
-      color: var(--accent);
+      color: #E2E8F0;
       text-transform: uppercase;
       letter-spacing: 2.5px;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95), 0 0 8px rgba(0, 0, 0, 0.8);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95), 0 1px 3px rgba(0, 0, 0, 0.9);
     }
 
     .user-greeting {
       font-size: 12px;
       font-weight: 600;
-      color: #E2E8F0;
+      color: #CBD5E1;
       margin-top: 2px;
       letter-spacing: 1px;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
     }
 
     /* Search Bar with Engine Picker */
@@ -639,8 +672,8 @@
       font-size: 15px;
       font-weight: 600;
       outline: none;
-      backdrop-filter: blur(28px) saturate(190%) contrast(105%);
-      -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%);
+      backdrop-filter: blur(12px) saturate(110%);
+      -webkit-backdrop-filter: blur(12px) saturate(110%);
       box-shadow: var(--glass-shadow);
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -651,10 +684,11 @@
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
     }
 
-    .search-input:focus {
+    .search-input:focus,
+    .search-input:hover {
       border-color: var(--accent);
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(0, 0, 0, 0.20) 100%), rgba(14, 20, 36, calc(var(--glass-opacity) + 0.1));
-      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5), 0 0 24px rgba(var(--accent-rgb), 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.7);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0.2) 100%), rgba(var(--accent-rgb), 0.12);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(var(--accent-rgb), 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.4);
     }
 
     /* 4. SPEED DIALS (5 Customizable Slots) */
@@ -702,17 +736,17 @@
       gap: 8px;
       text-decoration: none;
       color: inherit;
-      backdrop-filter: blur(28px) saturate(190%) contrast(105%);
-      -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%);
+      backdrop-filter: blur(12px) saturate(110%);
+      -webkit-backdrop-filter: blur(12px) saturate(110%);
       box-shadow: var(--glass-shadow);
       cursor: pointer;
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .speed-dial-card:hover {
-      border-color: var(--accent);
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 50%, rgba(0, 0, 0, 0.2) 100%), rgba(var(--accent-rgb), 0.22);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45), 0 0 20px rgba(var(--accent-rgb), 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.7);
+      border-color: var(--accent) !important;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0.2) 100%), rgba(var(--accent-rgb), 0.12) !important;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(var(--accent-rgb), 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
       transform: translateY(-3px);
     }
 
@@ -781,7 +815,7 @@
     /* 5. DYNAMIC OSS WEATHER WIDGET & HISTORY GRID */
     .dashboard-grid {
       display: grid;
-      grid-template-columns: 350px 1fr;
+      grid-template-columns: 380px 1fr;
       gap: 20px;
       width: 100%;
     }
@@ -797,8 +831,8 @@
       border: var(--glass-border);
       border-radius: var(--radius-lg);
       padding: 18px;
-      backdrop-filter: blur(28px) saturate(190%) contrast(105%);
-      -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%);
+      backdrop-filter: blur(12px) saturate(110%);
+      -webkit-backdrop-filter: blur(12px) saturate(110%);
       box-shadow: var(--glass-shadow);
       display: flex;
       flex-direction: column;
@@ -807,8 +841,8 @@
     }
 
     .panel:hover {
-      border-color: rgba(var(--accent-rgb), 0.55);
-      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45), 0 0 20px rgba(var(--accent-rgb), 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.7);
+      border-color: var(--accent) !important;
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5), 0 0 24px rgba(var(--accent-rgb), 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
     }
 
     .panel-header {
@@ -1365,6 +1399,39 @@
         </div>
       </div>
 
+      <!-- Atmosphere Weather Dock Card -->
+      <div class="dock-card weather-dock-card">
+        <div class="dock-card-header">
+          <span style="display: flex; align-items: center; gap: 6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+              <circle cx="12" cy="12" r="5"></circle>
+            </svg>
+            Atmosphere
+          </span>
+          <button id="change-city-btn" class="weather-city-btn" title="Change Location">
+            <span id="weather-city-name">City</span> ▾
+          </button>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 2px 0;">
+          <div style="display: flex; align-items: baseline; gap: 4px;">
+            <div id="weather-temp" style="font-size: 32px; font-weight: 800; color: #FFFFFF; font-variant-numeric: tabular-nums; text-shadow: 0 2px 4px rgba(0,0,0,0.9);">--°</div>
+            <button id="unit-toggle" class="weather-unit-toggle">°C</button>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: flex-end;">
+            <div id="weather-icon" style="font-size: 24px; line-height: 1;">☀️</div>
+            <div id="weather-cond" style="font-size: 11px; font-weight: 600; color: #E2E8F0; text-shadow: 0 1px 2px rgba(0,0,0,0.85); margin-top: 2px;">Clear Sky</div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 10px; font-size: 10px; color: #CBD5E1;">
+          <div>Feels: <strong id="weather-feels" style="color: #FFF;">--°C</strong></div>
+          <div>Hum: <strong id="weather-humidity" style="color: #FFF;">--%</strong></div>
+          <div>Wind: <strong id="weather-wind" style="color: #FFF;">-- km/h</strong></div>
+        </div>
+      </div>
+
       <!-- CPU Throttle & EcoQoS -->
       <div class="dock-card">
         <div class="dock-card-header">
@@ -1443,90 +1510,58 @@
       <div class="dashboard-grid">
         <!-- LEFT: Atmosphere Weather & YouTube Music Hub -->
         <div class="panel">
-          <!-- Split Row: Weather (Half) + YouTube Music (Half) -->
-          <div class="weather-ytm-split-row">
-            <!-- 1. COMPACT WEATHER WIDGET -->
-            <div class="weather-compact-card">
-              <div class="panel-header" style="padding-bottom: 6px; margin-bottom: 8px;">
-                <div class="panel-title" style="font-size: 11px;">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
-                    <circle cx="12" cy="12" r="5"></circle>
-                  </svg>
-                  Atmosphere
-                </div>
-                <button id="change-city-btn" class="weather-city-btn" style="font-size: 10px; padding: 2px 6px;">
-                  <span id="weather-city-name">City</span>
-                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
-                </button>
+          <!-- Realistic YouTube Music Player -->
+          <div class="ytm-player-panel">
+            <div class="panel-header" style="padding-bottom: 8px; margin-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: space-between;">
+              <div class="panel-title" style="color: #FF0000; font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#FF0000">
+                  <path d="M12 0C5.376 0 0 5.376 0 12s5.376 12 12 12 12-5.376 12-12S18.624 0 12 0zm0 19.2c-3.97 0-7.2-3.23-7.2-7.2S8.03 4.8 12 4.8s7.2 3.23 7.2 7.2-3.23 7.2-7.2 7.2zm0-11.4c-2.316 0-4.2 1.884-4.2 4.2s1.884 4.2 4.2 4.2 4.2-1.884 4.2-4.2-1.884-4.2-4.2-4.2zm-1.2 5.88V10.32L14.4 12l-3.6 1.68z"/>
+                </svg>
+                <span style="letter-spacing: 0.5px; color: #FFFFFF;">YouTube Music</span>
               </div>
+              <button id="ytm-open-tab-btn" class="glass-btn" style="color: #FFFFFF; font-size: 10px; padding: 3px 10px; font-weight: 700; border-radius: 6px;" title="Open YouTube Music Tab">
+                Open App ↗
+              </button>
+            </div>
 
-              <div class="weather-main-row" style="margin-bottom: 6px;">
-                <div class="weather-temp-wrap">
-                  <div id="weather-temp" class="weather-temp" style="font-size: 32px;">28°</div>
-                  <button id="unit-toggle" class="weather-unit-toggle" style="font-size: 10px; padding: 1px 4px;">°C</button>
-                </div>
-                <div class="weather-condition-box">
-                  <div id="weather-icon" class="weather-icon-badge" style="font-size: 22px;">☀️</div>
-                  <div id="weather-cond" class="weather-cond-desc" style="font-size: 11px;">Clear Sky</div>
-                </div>
+            <!-- Track Info Card -->
+            <div style="display: flex; gap: 14px; align-items: center; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 10px 12px; margin-bottom: 12px;">
+              <div id="ytm-thumb-wrap" style="width: 58px; height: 58px; border-radius: 10px; overflow: hidden; background: #111827; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+                <img id="ytm-thumbnail" src="icon-48.png" alt="Art" style="width: 100%; height: 100%; object-fit: cover;">
               </div>
-
-              <div class="weather-metrics-grid" style="grid-template-columns: 1fr; gap: 3px; padding: 6px 8px; font-size: 10px;">
-                <div>Feels: <strong id="weather-feels">29°C</strong> • Hum: <strong id="weather-humidity">38%</strong></div>
-                <div>Wind: <strong id="weather-wind">8 km/h</strong></div>
+              <div style="flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 3px;">
+                <div id="ytm-track-title" style="font-size: 14px; font-weight: 800; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 3px rgba(0,0,0,0.95);">
+                  Ready to Stream
+                </div>
+                <div id="ytm-track-artist" style="font-size: 12px; font-weight: 600; color: #CBD5E1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,0.85);">
+                  YouTube Music
+                </div>
+                <div id="ytm-status-pill" style="display: inline-flex; align-items: center; gap: 5px; font-size: 10px; color: #94A3B8; font-weight: 700; margin-top: 2px;">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background: #94A3B8; display: inline-block;"></span>
+                  Ready
+                </div>
               </div>
             </div>
 
-            <!-- 2. RICH YOUTUBE MUSIC WIDGET -->
-            <div class="ytm-player-panel">
-              <div class="panel-header" style="padding-bottom: 6px; margin-bottom: 8px;">
-                <div class="panel-title" style="color: #FF0000; font-size: 11px; display: flex; align-items: center; gap: 6px;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#FF0000">
-                    <path d="M12 0C5.376 0 0 5.376 0 12s5.376 12 12 12 12-5.376 12-12S18.624 0 12 0zm0 19.2c-3.97 0-7.2-3.23-7.2-7.2S8.03 4.8 12 4.8s7.2 3.23 7.2 7.2-3.23 7.2-7.2 7.2zm0-11.4c-2.316 0-4.2 1.884-4.2 4.2s1.884 4.2 4.2 4.2 4.2-1.884 4.2-4.2-1.884-4.2-4.2-4.2zm-1.2 5.88V10.32L14.4 12l-3.6 1.68z"/>
-                  </svg>
-                  YouTube Music
-                </div>
-                <button id="ytm-open-tab-btn" class="weather-city-btn" style="color: #FFFFFF; font-size: 10px; padding: 2px 6px;" title="Open YouTube Music Tab">
-                  Open App ↗
+            <!-- Controls & Volume Bar -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 2px;">
+              <!-- Playback Controls -->
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <button id="ytm-prev-btn" class="ytm-ctrl-btn" style="width: 32px; height: 32px;" title="Previous Track">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+                </button>
+                <button id="ytm-play-btn" class="ytm-play-main-btn" style="width: 40px; height: 40px;" title="Play / Pause">
+                  <svg id="ytm-play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </button>
+                <button id="ytm-next-btn" class="ytm-ctrl-btn" style="width: 32px; height: 32px;" title="Next Track">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
                 </button>
               </div>
 
-              <!-- Track Info Box -->
-              <div style="display: flex; gap: 8px; align-items: center; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 5px 8px; margin-bottom: 6px;">
-                <div id="ytm-thumb-wrap" style="width: 38px; height: 38px; border-radius: 6px; overflow: hidden; background: #111827; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2);">
-                  <img id="ytm-thumbnail" src="icon-48.png" alt="Art" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-                <div style="flex: 1; overflow: hidden; display: flex; flex-direction: column;">
-                  <div id="ytm-track-title" style="font-size: 11px; font-weight: 800; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,0.95);">
-                    Ready to Stream
-                  </div>
-                  <div id="ytm-track-artist" style="font-size: 10px; font-weight: 600; color: #E2E8F0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,0.85);">
-                    YouTube Music
-                  </div>
-                </div>
-              </div>
-
-              <!-- Controls -->
-              <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <button id="ytm-prev-btn" class="ytm-ctrl-btn" title="Previous Track">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
-                  </button>
-                  <button id="ytm-play-btn" class="ytm-play-main-btn" title="Play / Pause">
-                    <svg id="ytm-play-icon" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                  </button>
-                  <button id="ytm-next-btn" class="ytm-ctrl-btn" title="Next Track">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
-                  </button>
-                </div>
-                <div style="display: flex; align-items: center; gap: 4px; flex: 1; max-width: 85px;">
-                  <span style="font-size: 9px; color: #E2E8F0; font-weight: 600;">Vol</span>
-                  <input type="range" id="ytm-volume-slider" min="0" max="100" step="5" value="80" style="height: 4px;">
-                </div>
+              <!-- Volume Slider -->
+              <div style="display: flex; align-items: center; gap: 6px; flex: 1; max-width: 140px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 4px 10px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #E2E8F0; flex-shrink: 0;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                <input type="range" id="ytm-volume-slider" min="0" max="100" step="5" value="80" style="height: 4px; flex: 1; cursor: pointer;">
               </div>
             </div>
           </div>
