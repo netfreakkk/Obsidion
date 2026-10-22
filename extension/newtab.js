@@ -2,7 +2,7 @@
  * Obsidion Core NewTab Dashboard Controller
  * Features:
  * 1. Wallpaper Engine Live Canvas (Nebula, Cyber Grid, Matrix, Fluid Aura, Starfield, Custom Media)
- * 2. Embedded Obsidion Core Dock (Real Task Manager RAM, Win32 Purge, WARP VPN, Lo-Fi, SFX, Accent)
+ * 2. Embedded Obsidion Core Dock (Real Task Manager RAM, Win32 Purge, WARP / Proton VPN, SFX, Accent)
  * 3. Dynamic Open-Source Weather Widget with City Search Autocomplete (Open-Meteo)
  * 4. 5 Customizable Speed Dials with Modals
  * 5. History Quick Links (chrome.history / chrome.topSites)
@@ -585,11 +585,15 @@
   const cpuSlider = document.getElementById("cpu-slider");
   const cpuValDisplay = document.getElementById("cpu-val-display");
   const adblockCounter = document.getElementById("adblock-counter");
-  const lofiBtn = document.getElementById("lofi-play-btn");
-  const lofiNextBtn = document.getElementById("lofi-next-btn");
-  const lofiStationName = document.getElementById("lofi-station-name");
-  const lofiAudio = document.getElementById("lofi-audio");
-  const lofiVolume = document.getElementById("lofi-volume");
+  const ytmPlayBtn = document.getElementById("ytm-play-btn");
+  const ytmPlayIcon = document.getElementById("ytm-play-icon");
+  const ytmPrevBtn = document.getElementById("ytm-prev-btn");
+  const ytmNextBtn = document.getElementById("ytm-next-btn");
+  const ytmOpenTabBtn = document.getElementById("ytm-open-tab-btn");
+  const ytmThumbnail = document.getElementById("ytm-thumbnail");
+  const ytmTrackTitle = document.getElementById("ytm-track-title");
+  const ytmTrackArtist = document.getElementById("ytm-track-artist");
+  const ytmVolumeSlider = document.getElementById("ytm-volume-slider");
   const colorChips = document.querySelectorAll(".color-chip");
   const accentName = document.getElementById("accent-name");
   const hookState = document.getElementById("hook-state");
@@ -678,9 +682,31 @@
   }
 
   // Obsidion Secure VPN Controller
-  function updateVpnState(active, labelText) {
+  function setVpnConnecting(isConnecting, provName) {
+    if (!vpnToggleBox) return;
+    if (isConnecting) {
+      vpnToggleBox.classList.remove("connected");
+      vpnToggleBox.classList.add("connecting");
+      if (vpnStateLabel) {
+        vpnStateLabel.textContent = "CONNECTING...";
+        vpnStateLabel.style.color = "#F59E0B";
+      }
+      if (vpnModeDesc) {
+        vpnModeDesc.textContent = `Handshake with ${provName || "secure proxy"}...`;
+      }
+      if (vpnPingBadge) {
+        vpnPingBadge.textContent = "Negotiating...";
+        vpnPingBadge.style.color = "#F59E0B";
+      }
+    } else {
+      vpnToggleBox.classList.remove("connecting");
+    }
+  }
+
+  function updateVpnState(active, labelText, ping) {
     if (vpnCheckbox) vpnCheckbox.checked = active;
     if (vpnToggleBox) {
+      vpnToggleBox.classList.remove("connecting");
       if (active) {
         vpnToggleBox.classList.add("connected");
         if (vpnStateLabel) {
@@ -688,34 +714,35 @@
           vpnStateLabel.style.color = "#10B981";
         }
         if (vpnModeDesc) {
-          const prov = vpnProviderSelect ? vpnProviderSelect.value : "direct_privacy";
+          const prov = vpnProviderSelect ? vpnProviderSelect.value : "cloudflare_warp";
           if (prov === "cloudflare_warp") vpnModeDesc.textContent = "WARP SOCKS5 (127.0.0.1:40000)";
+          else if (prov === "proton_free") vpnModeDesc.textContent = "Proton VPN Free (Zero-Logs)";
           else if (prov === "custom_socks5") vpnModeDesc.textContent = `Custom (${customProxyInput ? customProxyInput.value : "1080"})`;
           else vpnModeDesc.textContent = "Secure Privacy Mode";
         }
         if (vpnPingBadge) {
-          vpnPingBadge.textContent = "Active • Encrypted";
+          vpnPingBadge.textContent = ping ? `Active • ${ping}` : "Active • Encrypted";
           vpnPingBadge.style.color = "#10B981";
         }
       } else {
         vpnToggleBox.classList.remove("connected");
         if (vpnStateLabel) {
           vpnStateLabel.textContent = "Disconnected";
-          vpnStateLabel.style.color = "var(--text)";
+          vpnStateLabel.style.color = "#FFFFFF";
         }
         if (vpnModeDesc) {
           vpnModeDesc.textContent = "Click switch to connect";
         }
         if (vpnPingBadge) {
           vpnPingBadge.textContent = "Off";
-          vpnPingBadge.style.color = "var(--text-dim)";
+          vpnPingBadge.style.color = "#E2E8F0";
         }
       }
     }
   }
 
   if (vpnProviderSelect) {
-    const savedProv = localStorage.getItem("obsidion_vpn_provider") || "direct_privacy";
+    const savedProv = localStorage.getItem("obsidion_vpn_provider") || "cloudflare_warp";
     vpnProviderSelect.value = savedProv;
     if (customProxyRow) customProxyRow.style.display = savedProv === "custom_socks5" ? "block" : "none";
 
@@ -745,12 +772,19 @@
     vpnCheckbox.addEventListener("change", (e) => {
       e.stopPropagation();
       const active = vpnCheckbox.checked;
-      playVpnHum(active);
-      updateVpnState(active);
-      showToast(active ? "Connecting Obsidion VPN..." : "VPN Disconnected");
-
-      const provider = vpnProviderSelect ? vpnProviderSelect.value : "direct_privacy";
+      const provider = vpnProviderSelect ? vpnProviderSelect.value : "cloudflare_warp";
       const customAddr = customProxyInput ? customProxyInput.value.trim() : "127.0.0.1:1080";
+      const provLabel = vpnProviderSelect ? vpnProviderSelect.options[vpnProviderSelect.selectedIndex].text.split("(")[0].trim() : "VPN";
+
+      if (active) {
+        setVpnConnecting(true, provLabel);
+        showToast(`Connecting to ${provLabel}...`);
+      } else {
+        setVpnConnecting(false);
+        updateVpnState(false);
+        playVpnHum(false);
+        showToast("VPN Disconnected");
+      }
 
       ext.runtime.sendMessage({
         action: "set_vpn",
@@ -758,10 +792,14 @@
         provider: provider,
         customAddress: customAddr
       }, (res) => {
+        setVpnConnecting(false);
         const isConn = res && res.status === "connected";
-        updateVpnState(isConn, res ? res.label : null);
+        updateVpnState(isConn, res ? res.label : null, res ? res.ping : "22ms");
         if (isConn) {
-          showToast(`VPN Connected: ${res.label || "Encrypted"}`);
+          playVpnHum(true);
+          showToast(`🛡️ VPN Connected: ${res.label || "Encrypted"}`);
+        } else if (active) {
+          showToast("VPN Disconnected");
         }
       });
     });
@@ -800,87 +838,106 @@
     }
   }, 4000);
 
-  // Lo-Fi Player
-  if (lofiBtn && lofiAudio) {
-    const LOFI_STREAMS = [
-      { name: "0R Chillhop & Lo-Fi", url: "https://0nlineradio.stream42.radiohost.de/0r-lo-fi" },
-      { name: "24/7 Lofi Radio", url: "https://ec3.yesstreaming.net:3755/stream" },
-      { name: "Retro Lofi & Chiptune", url: "https://a5.asurahosting.com:8150/radio.mp3" }
-    ];
-    let lofiCurrentIdx = 0;
-    let lofiIsPlaying = false;
+  // =========================================================================
+  // YouTube Music Mini Player Controller (music.youtube.com sync)
+  // =========================================================================
+  let ytmIsPlaying = false;
 
-    function updateLofiStationUI() {
-      if (lofiStationName) {
-        lofiStationName.textContent = LOFI_STREAMS[lofiCurrentIdx].name;
-        lofiStationName.title = `Current Station: ${LOFI_STREAMS[lofiCurrentIdx].name}`;
-      }
+  function updateYtmUI(state) {
+    if (!state) return;
+    if (ytmTrackTitle && state.title) {
+      ytmTrackTitle.textContent = state.title;
+      ytmTrackTitle.title = state.title;
     }
-
-    function playLofiStation() {
-      lofiAudio.src = LOFI_STREAMS[lofiCurrentIdx].url;
-      lofiAudio.load();
-      lofiAudio.play().then(() => {
-        lofiIsPlaying = true;
-        lofiBtn.textContent = "❚❚";
-        lofiBtn.style.background = "#10B981";
-        showToast(`Playing ${LOFI_STREAMS[lofiCurrentIdx].name}`);
-      }).catch((err) => {
-        console.warn("LoFi playback error, trying next station...", err);
-        switchLofiStation(true);
-      });
+    if (ytmTrackArtist && state.artist) {
+      ytmTrackArtist.textContent = state.artist;
+      ytmTrackArtist.title = state.artist;
     }
-
-    function switchLofiStation(autoRetry = false) {
-      lofiCurrentIdx = (lofiCurrentIdx + 1) % LOFI_STREAMS.length;
-      updateLofiStationUI();
-      if (lofiIsPlaying || autoRetry) {
-        playLofiStation();
+    if (ytmThumbnail && state.thumbnail) {
+      ytmThumbnail.src = state.thumbnail;
+    }
+    if (state.volume !== undefined && ytmVolumeSlider) {
+      ytmVolumeSlider.value = state.volume;
+    }
+    ytmIsPlaying = !!state.isPlaying;
+    if (ytmPlayIcon) {
+      if (ytmIsPlaying) {
+        ytmPlayIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
       } else {
-        lofiAudio.src = LOFI_STREAMS[lofiCurrentIdx].url;
-        showToast(`Station: ${LOFI_STREAMS[lofiCurrentIdx].name}`);
+        ytmPlayIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
       }
     }
+    if (ytmPlayBtn) {
+      if (ytmIsPlaying) {
+        ytmPlayBtn.style.background = "#10B981";
+      } else {
+        ytmPlayBtn.style.background = "#FF0000";
+      }
+    }
+  }
 
-    lofiBtn.addEventListener("click", () => {
+  function fetchYtmState() {
+    try {
+      ext.runtime.sendMessage({ action: "get_ytm_state" }, (res) => {
+        if (res) updateYtmUI(res);
+      });
+    } catch (e) {}
+  }
+
+  // Periodic heartbeat sync
+  fetchYtmState();
+  setInterval(fetchYtmState, 2500);
+
+  // Listen for broadcast push messages from background / content-script
+  ext.runtime.onMessage.addListener((msg) => {
+    if (msg && msg.action === "ytm_broadcast" && msg.data) {
+      updateYtmUI(msg.data);
+    }
+  });
+
+  if (ytmPlayBtn) {
+    ytmPlayBtn.addEventListener("click", () => {
       playCyberClick();
-      if (!lofiIsPlaying) {
-        if (!lofiAudio.src || lofiAudio.src === "" || lofiAudio.src.includes("stream.zeno.fm")) {
-          lofiAudio.src = LOFI_STREAMS[lofiCurrentIdx].url;
+      ext.runtime.sendMessage({ action: "ytm_control", command: "play_pause" }, (res) => {
+        if (res && res.status === "tab_created") {
+          showToast("Opening YouTube Music...");
+        } else if (res && res.info) {
+          updateYtmUI(res.info);
         }
-        playLofiStation();
-      } else {
-        lofiAudio.pause();
-        lofiIsPlaying = false;
-        lofiBtn.textContent = "▶";
-        lofiBtn.style.background = "var(--accent)";
-        showToast("Lo-Fi Paused");
-      }
-    });
-
-    if (lofiNextBtn) {
-      lofiNextBtn.addEventListener("click", () => {
-        playCyberClick();
-        switchLofiStation(false);
       });
-    }
-
-    lofiAudio.addEventListener("error", (e) => {
-      if (lofiIsPlaying) {
-        console.warn("LoFi stream error encountered, failing over...", e);
-        showToast("Station signal lost, switching...");
-        switchLofiStation(true);
-      }
     });
+  }
 
-    if (lofiVolume) {
-      lofiAudio.volume = parseFloat(lofiVolume.value || "0.5");
-      lofiVolume.addEventListener("input", (e) => {
-        lofiAudio.volume = parseFloat(e.target.value);
+  if (ytmPrevBtn) {
+    ytmPrevBtn.addEventListener("click", () => {
+      playCyberClick();
+      ext.runtime.sendMessage({ action: "ytm_control", command: "prev" }, (res) => {
+        if (res && res.info) updateYtmUI(res.info);
       });
-    }
+    });
+  }
 
-    updateLofiStationUI();
+  if (ytmNextBtn) {
+    ytmNextBtn.addEventListener("click", () => {
+      playCyberClick();
+      ext.runtime.sendMessage({ action: "ytm_control", command: "next" }, (res) => {
+        if (res && res.info) updateYtmUI(res.info);
+      });
+    });
+  }
+
+  if (ytmOpenTabBtn) {
+    ytmOpenTabBtn.addEventListener("click", () => {
+      playCyberClick();
+      ext.runtime.sendMessage({ action: "ytm_control", command: "open" });
+    });
+  }
+
+  if (ytmVolumeSlider) {
+    ytmVolumeSlider.addEventListener("input", (e) => {
+      const vol = parseInt(e.target.value, 10);
+      ext.runtime.sendMessage({ action: "ytm_control", command: "set_volume", volume: vol });
+    });
   }
 
   // Dynamic Accent Theme Picker

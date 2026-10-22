@@ -318,6 +318,18 @@
       box-shadow: 0 0 16px rgba(16, 185, 129, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3);
     }
 
+    .vpn-box.connecting {
+      border-color: #F59E0B;
+      background: rgba(245, 158, 11, 0.2);
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+      animation: vpnPulse 1.2s infinite alternate;
+    }
+
+    @keyframes vpnPulse {
+      0% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
     .vpn-left {
       display: flex;
       align-items: center;
@@ -417,64 +429,6 @@
       box-shadow: 0 0 10px var(--accent-glow);
     }
 
-    /* Lo-Fi Player Widget */
-    .lofi-player {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: rgba(0, 0, 0, 0.25);
-      border-radius: 8px;
-      padding: 8px 10px;
-    }
-
-    .lofi-info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 11px;
-    }
-
-    .lofi-btn {
-      background: var(--accent-glow);
-      color: #0B0F17;
-      border: none;
-      border-radius: 50%;
-      width: 26px;
-      height: 26px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 11px;
-      font-weight: 800;
-      transition: transform 0.1s ease;
-    }
-
-    .lofi-btn:hover {
-      transform: scale(1.1);
-    }
-
-    .lofi-sub-btn {
-      background: rgba(255, 255, 255, 0.08);
-      color: #E2E8F0;
-      border: 1px solid var(--border);
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 10px;
-      transition: all 0.15s ease;
-    }
-
-    .lofi-sub-btn:hover {
-      background: var(--accent-glow);
-      color: #0B0F17;
-      transform: scale(1.1);
-    }
-
     /* Toast */
     .toast {
       font-size: 11px;
@@ -571,8 +525,9 @@
         </label>
       </div>
       <select id="vpn-provider-select" style="width: 100%; background: rgba(0,0,0,0.25); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 4px 6px; font-size: 10px; outline: none; cursor: pointer;">
-        <option value="direct_privacy">Secure Privacy Proxy (Zero Setup)</option>
-        <option value="cloudflare_warp">Cloudflare WARP (127.0.0.1:40000)</option>
+        <option value="cloudflare_warp">Cloudflare WARP (WireGuard • 127.0.0.1:40000)</option>
+        <option value="proton_free">Proton VPN Free (Zero-Logs • NL / US / JP)</option>
+        <option value="direct_privacy">Secure Privacy Proxy (Zero Setup Fallback)</option>
         <option value="custom_socks5">Custom SOCKS5 / HTTP Proxy</option>
       </select>
       <div id="custom-proxy-row" style="display: none; margin-top: 2px;">
@@ -605,23 +560,6 @@
         <span style="font-size: 12px; color: var(--text-muted);">Blocked Trackers &amp; Ads:</span>
         <span id="adblock-counter" style="font-size: 16px; font-weight: 800; color: var(--accent-glow);">148</span>
       </div>
-    </div>
-
-    <!-- Ambient Lo-Fi Chill Player -->
-    <div class="card">
-      <div class="card-title">
-        <span>Ambient Chill Stream</span>
-        <span style="font-size: 9px; color: var(--text-muted);">Lo-Fi Focus</span>
-      </div>
-      <div class="lofi-player">
-        <div class="lofi-info">
-          <button id="lofi-play-btn" class="lofi-btn" title="Play / Pause">▶</button>
-          <button id="lofi-next-btn" class="lofi-sub-btn" title="Next Station">⏭</button>
-          <span id="lofi-station-name" style="max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">0R Chillhop</span>
-        </div>
-        <input type="range" id="lofi-volume" min="0" max="1" step="0.05" value="0.5" style="width: 60px;" title="Volume">
-      </div>
-      <audio id="lofi-audio" preload="none" crossorigin="anonymous" src="https://0nlineradio.stream42.radiohost.de/0r-lo-fi"></audio>
     </div>
 
     <!-- Accent Color Glow Picker -->

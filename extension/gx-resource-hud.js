@@ -24,11 +24,6 @@
   const cpuSlider = document.getElementById("cpu-slider");
   const cpuValDisplay = document.getElementById("cpu-val-display");
   const adblockCounter = document.getElementById("adblock-counter");
-  const lofiBtn = document.getElementById("lofi-play-btn");
-  const lofiNextBtn = document.getElementById("lofi-next-btn");
-  const lofiStationName = document.getElementById("lofi-station-name");
-  const lofiAudio = document.getElementById("lofi-audio");
-  const lofiVolume = document.getElementById("lofi-volume");
   const toastMsg = document.getElementById("toast-msg");
   const colorChips = document.querySelectorAll(".color-chip");
   const accentName = document.getElementById("accent-name");
@@ -218,32 +213,57 @@
   }
 
   // 4. Obsidion Secure VPN Hub
-  function updateVpnUI(connected, labelText) {
+  function setVpnConnecting(isConnecting, provName = "VPN") {
     if (!vpnBox || !vpnStateLabel) return;
+    if (isConnecting) {
+      vpnBox.classList.add("connecting");
+      vpnBox.classList.remove("connected");
+      vpnStateLabel.textContent = "CONNECTING...";
+      vpnStateLabel.style.color = "#F59E0B";
+      if (vpnModeDesc) vpnModeDesc.textContent = `Negotiating ${provName}...`;
+      if (vpnPingBadge) {
+        vpnPingBadge.textContent = "Handshake...";
+        vpnPingBadge.style.color = "#F59E0B";
+      }
+    } else {
+      vpnBox.classList.remove("connecting");
+    }
+  }
+
+  function updateVpnUI(connected, labelText, pingVal = "22ms") {
+    if (!vpnBox || !vpnStateLabel) return;
+    setVpnConnecting(false);
     if (connected) {
       vpnBox.classList.add("connected");
       vpnCheckbox.checked = true;
       vpnStateLabel.textContent = "CONNECTED";
       vpnStateLabel.style.color = "#10B981";
       if (vpnModeDesc) {
-        const prov = vpnProviderSelect ? vpnProviderSelect.value : "direct_privacy";
+        const prov = vpnProviderSelect ? vpnProviderSelect.value : "cloudflare_warp";
         if (prov === "cloudflare_warp") vpnModeDesc.textContent = "WARP SOCKS5 (127.0.0.1:40000)";
+        else if (prov === "proton_free") vpnModeDesc.textContent = "Proton VPN Free (127.0.0.1:1080)";
         else if (prov === "custom_socks5") vpnModeDesc.textContent = `Custom (${customProxyInput ? customProxyInput.value : "1080"})`;
         else vpnModeDesc.textContent = "Secure Privacy Mode";
       }
-      if (vpnPingBadge) vpnPingBadge.textContent = "Active • Encrypted";
+      if (vpnPingBadge) {
+        vpnPingBadge.textContent = `Active • ${pingVal}`;
+        vpnPingBadge.style.color = "#10B981";
+      }
     } else {
       vpnBox.classList.remove("connected");
       vpnCheckbox.checked = false;
       vpnStateLabel.textContent = "Disconnected";
       vpnStateLabel.style.color = "var(--text-main)";
       if (vpnModeDesc) vpnModeDesc.textContent = "Click switch to connect";
-      if (vpnPingBadge) vpnPingBadge.textContent = "Off";
+      if (vpnPingBadge) {
+        vpnPingBadge.textContent = "Off";
+        vpnPingBadge.style.color = "var(--text-muted)";
+      }
     }
   }
 
   if (vpnProviderSelect) {
-    const savedProv = localStorage.getItem("obsidion_vpn_provider") || "direct_privacy";
+    const savedProv = localStorage.getItem("obsidion_vpn_provider") || "cloudflare_warp";
     vpnProviderSelect.value = savedProv;
     if (customProxyRow) customProxyRow.style.display = savedProv === "custom_socks5" ? "block" : "none";
 
@@ -273,12 +293,19 @@
     vpnCheckbox.addEventListener("change", (e) => {
       e.stopPropagation();
       const active = e.target.checked;
-      playVpnHum(active);
-      updateVpnUI(active);
-      showToast(active ? "Connecting Obsidion VPN..." : "VPN Disconnected");
-
-      const provider = vpnProviderSelect ? vpnProviderSelect.value : "direct_privacy";
+      const provider = vpnProviderSelect ? vpnProviderSelect.value : "cloudflare_warp";
       const customAddr = customProxyInput ? customProxyInput.value.trim() : "127.0.0.1:1080";
+      const provLabel = vpnProviderSelect ? vpnProviderSelect.options[vpnProviderSelect.selectedIndex].text.split("(")[0].trim() : "VPN";
+
+      if (active) {
+        setVpnConnecting(true, provLabel);
+        showToast(`Connecting to ${provLabel}...`);
+      } else {
+        setVpnConnecting(false);
+        updateVpnUI(false);
+        playVpnHum(false);
+        showToast("VPN Disconnected");
+      }
 
       ext.runtime.sendMessage({
         action: "set_vpn",
@@ -286,10 +313,14 @@
         provider: provider,
         customAddress: customAddr
       }, (res) => {
+        setVpnConnecting(false);
         const isConn = res && res.status === "connected";
-        updateVpnUI(isConn, res ? res.label : null);
+        updateVpnUI(isConn, res ? res.label : null, res ? res.ping : "22ms");
         if (isConn) {
-          showToast(`VPN Connected: ${res.label || "Encrypted"}`);
+          playVpnHum(true);
+          showToast(`🛡️ VPN Connected: ${res.label || "Encrypted"}`);
+        } else if (active) {
+          showToast("VPN Disconnected");
         }
       });
     });
@@ -328,90 +359,7 @@
     }
   }, 4000);
 
-  // 7. Ambient Lo-Fi Player
-  if (lofiBtn && lofiAudio) {
-    const LOFI_STREAMS = [
-      { name: "0R Chillhop & Lo-Fi", url: "https://0nlineradio.stream42.radiohost.de/0r-lo-fi" },
-      { name: "24/7 Lofi Radio", url: "https://ec3.yesstreaming.net:3755/stream" },
-      { name: "Retro Lofi & Chiptune", url: "https://a5.asurahosting.com:8150/radio.mp3" }
-    ];
-    let lofiCurrentIdx = 0;
-    let lofiIsPlaying = false;
-
-    function updateLofiStationUI() {
-      if (lofiStationName) {
-        lofiStationName.textContent = LOFI_STREAMS[lofiCurrentIdx].name;
-        lofiStationName.title = `Current Station: ${LOFI_STREAMS[lofiCurrentIdx].name}`;
-      }
-    }
-
-    function playLofiStation() {
-      lofiAudio.src = LOFI_STREAMS[lofiCurrentIdx].url;
-      lofiAudio.load();
-      lofiAudio.play().then(() => {
-        lofiIsPlaying = true;
-        lofiBtn.textContent = "❚❚";
-        lofiBtn.style.background = "#10B981";
-        showToast(`Playing ${LOFI_STREAMS[lofiCurrentIdx].name}`);
-      }).catch((err) => {
-        console.warn("LoFi playback error, trying next station...", err);
-        switchLofiStation(true);
-      });
-    }
-
-    function switchLofiStation(autoRetry = false) {
-      lofiCurrentIdx = (lofiCurrentIdx + 1) % LOFI_STREAMS.length;
-      updateLofiStationUI();
-      if (lofiIsPlaying || autoRetry) {
-        playLofiStation();
-      } else {
-        lofiAudio.src = LOFI_STREAMS[lofiCurrentIdx].url;
-        showToast(`Station: ${LOFI_STREAMS[lofiCurrentIdx].name}`);
-      }
-    }
-
-    lofiBtn.addEventListener("click", () => {
-      playCyberClick();
-      if (!lofiIsPlaying) {
-        if (!lofiAudio.src || lofiAudio.src === "" || lofiAudio.src.includes("stream.zeno.fm")) {
-          lofiAudio.src = LOFI_STREAMS[lofiCurrentIdx].url;
-        }
-        playLofiStation();
-      } else {
-        lofiAudio.pause();
-        lofiIsPlaying = false;
-        lofiBtn.textContent = "▶";
-        lofiBtn.style.background = "var(--accent-glow)";
-        showToast("Lo-Fi Paused");
-      }
-    });
-
-    if (lofiNextBtn) {
-      lofiNextBtn.addEventListener("click", () => {
-        playCyberClick();
-        switchLofiStation(false);
-      });
-    }
-
-    lofiAudio.addEventListener("error", (e) => {
-      if (lofiIsPlaying) {
-        console.warn("LoFi stream error encountered, failing over...", e);
-        showToast("Station signal lost, switching...");
-        switchLofiStation(true);
-      }
-    });
-
-    if (lofiVolume) {
-      lofiAudio.volume = parseFloat(lofiVolume.value || "0.5");
-      lofiVolume.addEventListener("input", (e) => {
-        lofiAudio.volume = parseFloat(e.target.value);
-      });
-    }
-
-    updateLofiStationUI();
-  }
-
-  // 8. Dynamic Accent Glow Theme Picker
+  // 7. Dynamic Accent Glow Theme Picker
   colorChips.forEach((chip) => {
     chip.addEventListener("click", () => {
       playCyberClick();

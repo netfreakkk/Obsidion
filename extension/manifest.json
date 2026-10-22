@@ -38,6 +38,13 @@
   "background": {
     "scripts": ["background.js"]
   },
+  "content_scripts": [
+    {
+      "matches": ["*://music.youtube.com/*"],
+      "js": ["ytmusic-bridge.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "permissions": [
     "tabs",
     "proxy",
