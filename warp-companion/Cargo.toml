@@ -1,0 +1,21 @@
+[package]
+name = "warp_companion"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[lib]
+name = "warp_companion"
+crate-type = ["lib"]
+
+[[bin]]
+name = "warp_companion"
+path = "src/main.rs"
+
+[dependencies]
+x25519-dalek = { version = "2.0", features = ["static_secrets"] }
+rand_core = { version = "0.6", features = ["getrandom"] }
+base64 = "0.22"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

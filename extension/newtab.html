@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Obsidion Core</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --accent: #00F0FF;
+      --accent-rgb: 0, 240, 255;
+      --bg-dark: #0B0F17;
+      --bg-surface: rgba(14, 20, 34, 0.94);
+      --bg-card: rgba(18, 26, 44, 0.92);
+      --bg-card-hover: rgba(28, 42, 68, 0.96);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #F3F4F6;
+      --text-dim: #9CA3AF;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+      position: relative;
+      user-select: none;
+    }
+
+    /* 1. Wallpaper Engine Background Canvas & Custom Media */
+    #wallpaper-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      transition: filter 0.3s ease;
+    }
+
+    #custom-wallpaper-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      pointer-events: none;
+      display: none;
+      transition: opacity 0.4s ease, filter 0.3s ease;
+    }
+
+    #custom-wallpaper-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 0;
+      pointer-events: none;
+      display: none;
+    }
+
+    .vignette-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+      background: radial-gradient(circle at center, transparent 40%, rgba(11, 15, 23, 0.6) 85%, rgba(11, 15, 23, 0.85) 100%);
+    }
+
+    /* 2. Top Header Bar */
+    .top-bar {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #FFFFFF;
+    }
+
+    .brand-icon {
+      width: 24px;
+      height: 24px;
+      filter: drop-shadow(0 0 8px var(--accent));
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .glass-btn {
+      background: rgba(18, 26, 44, 0.6);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-btn:hover {
+      background: rgba(var(--accent-rgb), 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.3);
+      transform: translateY(-1px);
+    }
+
+    /* 3. Main Split View Layout */
+    .app-layout {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      width: 100%;
+      min-height: calc(100vh - 65px);
+      padding: 0 24px 32px 24px;
+      gap: 24px;
+    }
+
+    /* Support Dock on Left or Right */
+    .app-layout.dock-right {
+      flex-direction: row-reverse;
+    }
+
+    /* --- SIDE DOCK: Obsidion Core Hub --- */
+    .core-dock {
+      width: 320px;
+      min-width: 300px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: calc(100vh - 90px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+      padding-right: 4px;
+    }
+
+    .dock-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .dock-card:hover {
+      border-color: rgba(var(--accent-rgb), 0.35);
+    }
+
+    .dock-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-dim);
+    }
+
+    /* RAM Circular Gauge */
+    .gauge-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 6px 0;
+    }
+
+    .circular-gauge {
+      position: relative;
+      width: 86px;
+      height: 86px;
+    }
+
+    .circular-gauge svg {
+      width: 86px;
+      height: 86px;
+      transform: rotate(-90deg);
+    }
+
+    .gauge-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.08);
+      stroke-width: 7;
+    }
+
+    .gauge-bar {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 7;
+      stroke-linecap: round;
+      stroke-dasharray: 232;
+      stroke-dashoffset: 140;
+      transition: stroke-dashoffset 0.6s ease, stroke 0.3s ease;
+      filter: drop-shadow(0 0 6px var(--accent));
+    }
+
+    .gauge-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .gauge-val {
+      font-size: 15px;
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+
+    .gauge-sub {
+      font-size: 9px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    .gauge-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .stat-pill {
+      font-size: 11px;
+      color: var(--text-dim);
+      background: rgba(0, 0, 0, 0.25);
+      padding: 4px 8px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .stat-pill strong {
+      color: var(--text);
+    }
+
+    /* Sliders */
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .slider-val {
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #182236;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--accent);
+      transition: transform 0.1s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.25);
+    }
+
+    .action-btn {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: linear-gradient(135deg, #182238 0%, #101726 100%);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.35);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    /* VPN Box */
+    .vpn-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .vpn-box.connected {
+      border-color: #10B981;
+      background: rgba(16, 185, 129, 0.12);
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);
+    }
+
+    .switch-toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+    }
+
+    .switch-toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #374151;
+      border-radius: 20px;
+      transition: 0.2s;
+    }
+
+    .switch-slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+
+    input:checked + .switch-slider {
+      background: #10B981;
+    }
+
+    input:checked + .switch-slider:before {
+      transform: translateX(16px);
+    }
+
+    /* Accent Palette */
+    .palette-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .color-chip {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .color-chip:hover {
+      transform: scale(1.2);
+    }
+
+    .color-chip.active {
+      border-color: #FFFFFF;
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    /* Lo-Fi Player Widget */
+    .lofi-player {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+
+    .lofi-btn {
+      background: var(--accent);
+      color: #0B0F17;
+      border: none;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 800;
+      transition: transform 0.1s ease;
+    }
+
+    .lofi-btn:hover {
+      transform: scale(1.15);
+    }
+
+    .lofi-sub-btn {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text, #E2E8F0);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 10px;
+      transition: all 0.15s ease;
+    }
+
+    .lofi-sub-btn:hover {
+      background: var(--accent);
+      color: #0B0F17;
+      transform: scale(1.1);
+    }
+
+    /* --- MAIN DASHBOARD AREA --- */
+    .dashboard-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      max-width: 980px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Top Hero Clock */
+    .hero-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 4px;
+      margin-top: 6px;
+    }
+
+    .clock-display {
+      font-size: 58px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #FFFFFF;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 28px rgba(var(--accent-rgb), 0.4);
+    }
+
+    .date-display {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .user-greeting {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 2px;
+      letter-spacing: 0.8px;
+    }
+
+    /* Search Bar with Engine Picker */
+    .search-wrapper {
+      width: 100%;
+      max-width: 680px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 18px;
+      color: var(--text-dim);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 14px 20px 14px 48px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      color: #FFFFFF;
+      font-size: 15px;
+      outline: none;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.35);
+    }
+
+    /* 4. SPEED DIALS (5 Customizable Slots) */
+    .speed-dials-section {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .speed-dials-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .speed-dials-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .speed-dial-card {
+      position: relative;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+    }
+
+    .speed-dial-card:hover {
+      border-color: var(--accent);
+      background: var(--bg-card-hover);
+      box-shadow: 0 8px 24px rgba(var(--accent-rgb), 0.25);
+      transform: translateY(-3px);
+    }
+
+    .speed-dial-icon-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-size: 20px;
+    }
+
+    .speed-dial-icon-wrap img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+    }
+
+    .speed-dial-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #FFFFFF;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .speed-dial-actions {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      display: none;
+      gap: 4px;
+    }
+
+    .speed-dial-card:hover .speed-dial-actions {
+      display: flex;
+    }
+
+    .dial-action-btn {
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      border-radius: 4px;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    .dial-action-btn:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* 5. DYNAMIC OSS WEATHER WIDGET & HISTORY GRID */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 20px;
+      width: 100%;
+    }
+
+    @media (max-width: 900px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 10px;
+    }
+
+    .panel-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Weather card details */
+    .weather-main-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .weather-temp-wrap {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .weather-temp {
+      font-size: 44px;
+      font-weight: 800;
+      color: #FFFFFF;
+      line-height: 1;
+    }
+
+    .weather-unit-toggle {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      cursor: pointer;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .weather-condition-box {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+
+    .weather-icon-badge {
+      font-size: 28px;
+    }
+
+    .weather-cond-desc {
+      font-size: 13px;
+      font-weight: 600;
+      color: #FFFFFF;
+    }
+
+    .weather-city-btn {
+      background: transparent;
+      border: none;
+      color: var(--accent);
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      text-decoration: underline;
+    }
+
+    .weather-metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .weather-metrics-grid strong {
+      color: var(--text);
+    }
+
+    /* Quick Links from History */
+    .history-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    .history-card {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.15s ease;
+    }
+
+    .history-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(var(--accent-rgb), 0.4);
+      transform: translateY(-2px);
+    }
+
+    .history-card img {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+    }
+
+    .history-text {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .history-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #FFFFFF;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-domain {
+      font-size: 9px;
+      color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Curated Intelligence news tabs */
+    .news-nav {
+      display: flex;
+      gap: 6px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn.active {
+      background: rgba(var(--accent-rgb), 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.25);
+    }
+
+    .news-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 280px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+      padding-right: 4px;
+    }
+
+    .news-card {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.2s ease;
+    }
+
+    .news-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(var(--accent-rgb), 0.4);
+      transform: translateX(3px);
+    }
+
+    .news-tag {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--accent);
+    }
+
+    .news-headline {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--text);
+    }
+
+    .news-footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    /* 6. MODAL DIALOGS (using modern <dialog closedby="any">) */
+    dialog {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(14, 20, 34, 0.95);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      color: var(--text);
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+      background-color: #0E1422;
+      z-index: 100;
+    }
+
+    dialog::backdrop {
+      background-color: rgba(0, 0, 0, 0.75);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .modal-close-btn:hover {
+      color: #FFFFFF;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #FFFFFF;
+      font-size: 13px;
+      outline: none;
+      margin-bottom: 12px;
+    }
+
+    .modal-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.3);
+    }
+
+    .city-results-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 12px;
+    }
+
+    .city-item {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.15s ease;
+    }
+
+    .city-item:hover {
+      background: rgba(var(--accent-rgb), 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .wallpaper-preset-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .wallpaper-chip {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .wallpaper-chip.active,
+    .wallpaper-chip:hover {
+      background: rgba(var(--accent-rgb), 0.18);
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.3);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(14, 20, 34, 0.9);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 200;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, -6px);
+    }
+  </style>
+</head>
+<body>
+  <!-- Wallpaper Engine Layer -->
+  <canvas id="wallpaper-canvas"></canvas>
+  <div id="custom-wallpaper-bg"></div>
+  <video id="custom-wallpaper-video" autoplay loop muted playsinline></video>
+  <div class="vignette-overlay"></div>
+
+  <!-- Top Navigation & Controls Bar -->
+  <header class="top-bar">
+    <div class="brand-logo">
+      <svg class="brand-icon" viewBox="0 0 64 64" fill="none">
+        <polygon points="32,6 56,22 56,42 32,58 8,42 8,22" stroke="var(--accent)" stroke-width="4" fill="rgba(var(--accent-rgb), 0.15)"/>
+        <circle cx="32" cy="32" r="5" fill="var(--accent)"/>
+      </svg>
+      Obsidion Core
+    </div>
+
+    <div class="top-actions">
+      <button id="wallpaper-btn" class="glass-btn" title="Change Wallpaper Engine Themes & Custom Media">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="m4.93 4.93 4.24 4.24"></path>
+          <path d="m14.83 9.17 4.24-4.24"></path>
+          <path d="m14.83 14.83 4.24 4.24"></path>
+          <path d="m9.17 14.83-4.24 4.24"></path>
+        </svg>
+        Wallpaper Engine
+      </button>
+
+      <button id="dock-toggle-btn" class="glass-btn" title="Flip Obsidion Core Dock (Left / Right)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="9" y1="3" x2="9" y2="21"></line>
+        </svg>
+        <span id="dock-btn-label">Dock: Left</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- App Layout: Dock (Left/Right) + Dashboard -->
+  <main id="app-layout" class="app-layout">
+    <!-- ========================================================
+         SIDE DOCK: OBSIDION CORE HUB (Native on the Homepage!)
+         ======================================================== -->
+    <aside class="core-dock" aria-label="Obsidion Core Controls">
+      <!-- Header with SFX toggle -->
+      <div class="dock-card">
+        <div class="dock-card-header">
+          <span>Obsidion Control Center</span>
+          <button id="sfx-toggle-btn" class="glass-btn" style="padding: 2px 8px; font-size: 10px;" title="Cybernetic Sound FX">
+            SFX ON
+          </button>
+        </div>
+      </div>
+
+      <!-- Live RAM Governor (Hooked into Real Task Manager RAM) -->
+      <div class="dock-card">
+        <div class="dock-card-header">
+          <span>RAM Governor</span>
+          <span id="ram-used-text" style="color: var(--accent); font-weight: 800;">848 MB</span>
+        </div>
+        <div class="gauge-wrapper">
+          <div class="circular-gauge">
+            <svg>
+              <circle class="gauge-bg" cx="43" cy="43" r="37"></circle>
+              <circle id="ram-circle" class="gauge-bar" cx="43" cy="43" r="37"></circle>
+            </svg>
+            <div class="gauge-text">
+              <span id="ram-percent" class="gauge-val">41%</span>
+              <span class="gauge-sub">Load</span>
+            </div>
+          </div>
+          <div class="gauge-stats">
+            <div class="stat-pill">Tab Cap: <strong id="cap-text">5 Tabs</strong></div>
+            <div class="stat-pill">Tabs: <strong id="procs-count">0 Sleeping</strong></div>
+            <div class="stat-pill">Hook: <strong id="hook-state" style="color: #10B981;">WebExt Native</strong></div>
+          </div>
+        </div>
+        <div class="slider-row">
+          <div class="slider-labels">
+            <span>Loaded Tab Ceiling</span>
+            <span id="slider-cap-val" class="slider-val">5 Tabs</span>
+          </div>
+          <input type="range" id="ram-slider" min="2" max="25" step="1" value="5">
+        </div>
+        <button id="purge-btn" class="action-btn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          Discard Sleeping Tabs (Purge RAM)
+        </button>
+      </div>
+
+      <!-- Cloudflare WARP VPN Center -->
+      <div class="dock-card">
+        <div class="dock-card-header">
+          <span>Cloudflare WARP VPN</span>
+          <span id="vpn-ping-badge" style="font-size: 10px; color: #10B981;">12ms • Encrypted</span>
+        </div>
+        <div id="vpn-toggle-box" class="vpn-box connected">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <div>
+              <div id="vpn-state-label" style="font-size: 11px; font-weight: 700; color: #10B981;">WARP Active</div>
+              <div style="font-size: 9px; color: var(--text-dim);">SOCKS5 127.0.0.1:40000</div>
+            </div>
+          </div>
+          <label class="switch-toggle">
+            <input type="checkbox" id="vpn-checkbox" checked>
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- CPU Throttle & EcoQoS -->
+      <div class="dock-card">
+        <div class="dock-card-header">
+          <span>CPU Throttle</span>
+          <span id="cpu-val-display" class="slider-val">60%</span>
+        </div>
+        <div class="slider-row">
+          <div class="slider-labels">
+            <span>Power Throttle</span>
+            <span style="color: #10B981; font-weight: 600;">EcoQoS Active</span>
+          </div>
+          <input type="range" id="cpu-slider" min="10" max="100" step="5" value="60">
+        </div>
+      </div>
+
+      <!-- Necko Shield Tracker/Ad Counter -->
+      <div class="dock-card">
+        <div class="dock-card-header">
+          <span>Necko Shield Blocker</span>
+          <span style="color: #10B981;">ACTIVE</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 11px; color: var(--text-dim);">Blocked Trackers &amp; Ads:</span>
+          <span id="adblock-counter" style="font-size: 15px; font-weight: 800; color: var(--accent);">182</span>
+        </div>
+      </div>
+
+      <!-- Ambient Lo-Fi Chill Beats Player -->
+      <div class="dock-card">
+        <div class="dock-card-header">
+          <span>Ambient Focus Beats</span>
+          <span style="font-size: 9px; color: var(--text-dim);">Lo-Fi Stream</span>
+        </div>
+        <div class="lofi-player">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <button id="lofi-play-btn" class="lofi-btn" title="Play / Pause">▶</button>
+            <button id="lofi-next-btn" class="lofi-sub-btn" title="Next Station">⏭</button>
+            <span id="lofi-station-name" style="font-size: 11px; max-width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">0R Chillhop</span>
+          </div>
+          <input type="range" id="lofi-volume" min="0" max="1" step="0.05" value="0.5" style="width: 55px;" title="Volume">
+        </div>
+        <audio id="lofi-audio" preload="none" crossorigin="anonymous" src="https://0nlineradio.stream42.radiohost.de/0r-lo-fi"></audio>
+      </div>
+
+      <!-- Theme Accent Glow Chips -->
+      <div class="dock-card">
+        <div class="dock-card-header">
+          <span>Accent Glow Theme</span>
+          <span id="accent-name" style="color: var(--accent);">Cyan</span>
+        </div>
+        <div class="palette-row">
+          <div class="color-chip active" style="background: #00F0FF;" data-color="#00F0FF" data-rgb="0, 240, 255" data-name="Cyan"></div>
+          <div class="color-chip" style="background: #A855F7;" data-color="#A855F7" data-rgb="168, 85, 247" data-name="Violet"></div>
+          <div class="color-chip" style="background: #F43F5E;" data-color="#F43F5E" data-rgb="244, 63, 94" data-name="Crimson"></div>
+          <div class="color-chip" style="background: #10B981;" data-color="#10B981" data-rgb="16, 185, 129" data-name="Emerald"></div>
+          <div class="color-chip" style="background: #F59E0B;" data-color="#F59E0B" data-rgb="245, 158, 11" data-name="Amber"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ========================================================
+         MAIN DASHBOARD
+         ======================================================== -->
+    <div class="dashboard-main">
+      <!-- Clock & Identity -->
+      <div class="hero-section">
+        <div id="clock" class="clock-display">17:40:00</div>
+        <div id="date" class="date-display">Tuesday, October 20, 2026</div>
+        <div class="user-greeting">System Online • Welcome, Netfreak</div>
+      </div>
+
+      <!-- Center Search Bar with Engine Picker -->
+      <div class="search-wrapper">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="search-input" class="search-input" placeholder="Search the web or enter URL..." autofocus>
+      </div>
+
+      <!-- 5 CUSTOMIZABLE SPEED DIALS -->
+      <section class="speed-dials-section">
+        <div class="section-label">
+          <span>⚡ Speed Dials</span>
+          <span style="font-size: 10px; color: var(--text-dim);">5 Customizable Slots</span>
+        </div>
+        <div id="speed-dials-container" class="speed-dials-grid">
+          <!-- Populated dynamically by newtab.js -->
+        </div>
+      </section>
+
+      <!-- Dashboard Grid: Weather & History & Curated News -->
+      <div class="dashboard-grid">
+        <!-- LEFT: Dynamic Open-Source Weather Widget (Atmosphere) -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+                <circle cx="12" cy="12" r="5"></circle>
+              </svg>
+              Atmosphere
+            </div>
+            <button id="change-city-btn" class="weather-city-btn">
+              <span id="weather-city-name">Mahendranagar, NP</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="weather-main-row">
+            <div class="weather-temp-wrap">
+              <div id="weather-temp" class="weather-temp">28°</div>
+              <button id="unit-toggle" class="weather-unit-toggle">°C</button>
+            </div>
+            <div class="weather-condition-box">
+              <div id="weather-icon" class="weather-icon-badge">☀️</div>
+              <div id="weather-cond" class="weather-cond-desc">Clear Sky</div>
+            </div>
+          </div>
+
+          <div class="weather-metrics-grid">
+            <div>Feels Like: <strong id="weather-feels">29°C</strong></div>
+            <div>Humidity: <strong id="weather-humidity">38%</strong></div>
+            <div>Wind: <strong id="weather-wind">8 km/h</strong></div>
+            <div>Pressure: <strong id="weather-pressure">1012 hPa</strong></div>
+          </div>
+
+          <!-- History Quick Links -->
+          <div style="margin-top: 4px; border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 10px;">
+            <div class="section-label" style="margin-bottom: 8px;">
+              <span>🕒 Frequent History</span>
+            </div>
+            <div id="history-container" class="history-list">
+              <!-- Populated by newtab.js -->
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Curated Tech & Cinema Intelligence -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"></path>
+                <circle cx="5" cy="19" r="1"></circle>
+              </svg>
+              Curated Intelligence
+            </div>
+            <div class="news-nav">
+              <button id="tech-tab-btn" class="tab-btn active">⚡ Tech &amp; AI</button>
+              <button id="movies-tab-btn" class="tab-btn">🎬 Cinema &amp; Sci-Fi</button>
+            </div>
+          </div>
+
+          <div id="news-container" class="news-list">
+            <!-- News cards populated by newtab.js -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========================================================
+       MODALS (<dialog closedby="any">)
+       ======================================================== -->
+  <!-- City Selection Modal -->
+  <dialog id="city-modal" closedby="any" aria-labelledby="city-modal-title">
+    <div class="modal-header">
+      <h3 id="city-modal-title" class="modal-title">📍 Select City</h3>
+      <button class="modal-close-btn" data-close="city-modal">&times;</button>
+    </div>
+    <input type="text" id="city-search-input" class="modal-input" placeholder="Type city name (e.g. London, Tokyo, Mumbai, Toronto...)" autofocus>
+    <div id="city-search-status" style="font-size: 11px; color: var(--text-dim); margin-bottom: 8px;"></div>
+    <div id="city-results" class="city-results-list"></div>
+    <button id="auto-locate-btn" class="action-btn">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+      </svg>
+      Auto-Detect My Location
+    </button>
+  </dialog>
+
+  <!-- Wallpaper Engine Modal -->
+  <dialog id="wallpaper-modal" closedby="any" aria-labelledby="wp-modal-title">
+    <div class="modal-header">
+      <h3 id="wp-modal-title" class="modal-title">🎨 Wallpaper Engine</h3>
+      <button class="modal-close-btn" data-close="wallpaper-modal">&times;</button>
+    </div>
+
+    <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 8px;">Live Animated Presets:</div>
+    <div class="wallpaper-preset-grid">
+      <div class="wallpaper-chip active" data-preset="nebula">Deep Nebula</div>
+      <div class="wallpaper-chip" data-preset="grid">Neon Cyber Grid</div>
+      <div class="wallpaper-chip" data-preset="matrix">Matrix Rain</div>
+      <div class="wallpaper-chip" data-preset="fluid">Fluid Aura</div>
+      <div class="wallpaper-chip" data-preset="starfield">Starfield Minimal</div>
+      <div class="wallpaper-chip" data-preset="custom">Custom Media</div>
+    </div>
+
+    <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 6px;">Custom Image or Video:</div>
+    <input type="file" id="custom-wp-file" accept="image/*,video/*" class="modal-input" style="padding: 6px;">
+    <input type="text" id="custom-wp-url" class="modal-input" placeholder="Or paste image / video direct URL...">
+
+    <div style="display: flex; gap: 16px; margin-top: 6px;">
+      <div style="flex: 1;">
+        <div class="slider-labels" style="margin-bottom: 4px;">
+          <span>Blur</span>
+          <span id="wp-blur-val">0px</span>
+        </div>
+        <input type="range" id="wp-blur-slider" min="0" max="20" step="1" value="0">
+      </div>
+      <div style="flex: 1;">
+        <div class="slider-labels" style="margin-bottom: 4px;">
+          <span>Brightness</span>
+          <span id="wp-bright-val">100%</span>
+        </div>
+        <input type="range" id="wp-bright-slider" min="20" max="120" step="5" value="100">
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Speed Dial Edit Modal -->
+  <dialog id="speeddial-modal" closedby="any" aria-labelledby="sd-modal-title">
+    <div class="modal-header">
+      <h3 id="sd-modal-title" class="modal-title">⚡ Configure Speed Dial</h3>
+      <button class="modal-close-btn" data-close="speeddial-modal">&times;</button>
+    </div>
+    <input type="hidden" id="sd-edit-index" value="-1">
+    <label style="font-size: 11px; color: var(--text-dim); margin-bottom: 4px; display: block;">Title</label>
+    <input type="text" id="sd-title-input" class="modal-input" placeholder="e.g. YouTube, GitHub, Reddit">
+    <label style="font-size: 11px; color: var(--text-dim); margin-bottom: 4px; display: block;">URL</label>
+    <input type="text" id="sd-url-input" class="modal-input" placeholder="https://example.com">
+    <button id="sd-save-btn" class="action-btn" style="margin-top: 8px;">Save Speed Dial</button>
+  </dialog>
+
+  <div id="toast-msg" class="toast">Ready</div>
+
+  <script src="newtab.js"></script>
+</body>
+</html>

@@ -1,28 +1,30 @@
-# Ignore unpacked Mozilla Gecko source tree and build artifacts
-engine/
-obj-*/
-dist/
-target/
-toolchain/
-.surfer/
-
-# Compiled libraries and binaries
+# Compiled binaries and extensions
 *.xpi
+*.zip
 *.pdb
 *.lib
 *.dll
 *.exe
-*.lnk
+
+# Legacy directories
+engine/
+crates/
+
+# Rust target directories
+target/
+warp-companion/target/
+Cargo.lock
 
 # Build logs and temporary files
 *.log
-msi_extract.log
 
 # Node dependencies
 node_modules/
 
 # Runtime credentials / generated profiles
 warp_profile.json
+warp-companion/warp_profile.json
+*.obsidion_backup
 
 # Internal AI playbooks & agent configs
 antigravity_gecko_agent_playbook.md

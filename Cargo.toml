@@ -1,7 +1,0 @@
-[workspace]
-members = [
-    "crates/resource_governor",
-    "crates/warp_socks_bridge",
-    "crates/necko_shield",
-]
-resolver = "2"
