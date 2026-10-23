@@ -9,8 +9,9 @@ if (Test-Path $xpiPath) { Remove-Item -Force $xpiPath }
 
 Write-Host "Compressing extension into $zipPath..."
 Compress-Archive -Path "$extensionDir\*" -DestinationPath $zipPath
-Move-Item -Force $zipPath $xpiPath
-Write-Host "Package created: $xpiPath ($((Get-Item $xpiPath).Length) bytes)"
+Copy-Item -Force $zipPath $xpiPath
+Copy-Item -Force $zipPath (Join-Path $repoRoot "obsidion-core.zip")
+Write-Host "Package created: $zipPath and $xpiPath"
 
 $profiles = @(
     "C:\Users\soura\AppData\Roaming\Mozilla\Firefox\Profiles\6v2gnnxj.default-unofficial-1792497456728",
