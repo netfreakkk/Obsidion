@@ -354,7 +354,75 @@
 
   startWallpaperEngine();
 
+  // =========================================================================
+  // INDEXEDDB ENGINE FOR HIGH-RES & VIDEO WALLPAPERS (PERSISTS ACROSS RESTARTS)
+  // =========================================================================
+  const WP_DB_NAME = "ObsidionWallpaperDB";
+  const WP_DB_VERSION = 1;
+  const WP_STORE = "wallpapers";
+
+  function openWallpaperDB() {
+    return new Promise((resolve, reject) => {
+      if (!window.indexedDB) {
+        resolve(null);
+        return;
+      }
+      const req = indexedDB.open(WP_DB_NAME, WP_DB_VERSION);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(WP_STORE)) {
+          db.createObjectStore(WP_STORE);
+        }
+      };
+      req.onsuccess = (e) => resolve(e.target.result);
+      req.onerror = () => resolve(null);
+    });
+  }
+
+  async function saveWallpaperToDB(blob, isVideo, filename) {
+    try {
+      const db = await openWallpaperDB();
+      if (!db) return false;
+      return new Promise((resolve) => {
+        const tx = db.transaction(WP_STORE, "readwrite");
+        const store = tx.objectStore(WP_STORE);
+        store.put({ blob, isVideo, filename, time: Date.now() }, "active_wallpaper");
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
+      });
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async function getWallpaperFromDB() {
+    try {
+      const db = await openWallpaperDB();
+      if (!db) return null;
+      return new Promise((resolve) => {
+        const tx = db.transaction(WP_STORE, "readonly");
+        const store = tx.objectStore(WP_STORE);
+        const req = store.get("active_wallpaper");
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => resolve(null);
+      });
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function clearWallpaperDB() {
+    try {
+      const db = await openWallpaperDB();
+      if (!db) return;
+      const tx = db.transaction(WP_STORE, "readwrite");
+      tx.objectStore(WP_STORE).delete("active_wallpaper");
+    } catch (e) {}
+  }
+
   // Custom Wallpaper (Image / Video URL or Local File)
+  let activeCustomBlobUrl = null;
+
   function applyCustomMedia(src, isVideo) {
     if (isVideo) {
       if (customWpBg) customWpBg.style.display = "none";
@@ -375,12 +443,28 @@
     }
   }
 
-  // Restore saved wallpaper
-  const savedCustomMedia = localStorage.getItem("obsidion_custom_wp");
-  const savedIsVideo = localStorage.getItem("obsidion_custom_wp_isvideo") === "true";
-  if (currentWpPreset === "custom" && savedCustomMedia) {
-    applyCustomMedia(savedCustomMedia, savedIsVideo);
+  // Restore saved wallpaper (IndexedDB primary with localStorage fallback)
+  async function restoreSavedWallpaper() {
+    if (currentWpPreset !== "custom") return;
+
+    // 1. Try IndexedDB binary storage first (survives browser restarts with unlimited size)
+    const dbMedia = await getWallpaperFromDB();
+    if (dbMedia && dbMedia.blob) {
+      if (activeCustomBlobUrl) URL.revokeObjectURL(activeCustomBlobUrl);
+      activeCustomBlobUrl = URL.createObjectURL(dbMedia.blob);
+      const isVideo = dbMedia.isVideo !== undefined ? dbMedia.isVideo : (localStorage.getItem("obsidion_custom_wp_isvideo") === "true");
+      applyCustomMedia(activeCustomBlobUrl, isVideo);
+      return;
+    }
+
+    // 2. Fallback to localStorage string URL
+    const savedCustomMedia = localStorage.getItem("obsidion_custom_wp");
+    const savedIsVideo = localStorage.getItem("obsidion_custom_wp_isvideo") === "true";
+    if (savedCustomMedia) {
+      applyCustomMedia(savedCustomMedia, savedIsVideo);
+    }
   }
+  restoreSavedWallpaper();
 
   // Restore Blur & Brightness filters
   const savedBlur = localStorage.getItem("obsidion_wp_blur") || "0";
@@ -461,9 +545,7 @@
           customWpVideo.pause();
         }
       } else {
-        const src = localStorage.getItem("obsidion_custom_wp");
-        const isVid = localStorage.getItem("obsidion_custom_wp_isvideo") === "true";
-        if (src) applyCustomMedia(src, isVid);
+        restoreSavedWallpaper();
       }
       startWallpaperEngine();
       showToast(`Wallpaper: ${chip.textContent}`);
@@ -471,39 +553,35 @@
   });
 
   if (customWpFile) {
-    customWpFile.addEventListener("change", (e) => {
+    customWpFile.addEventListener("change", async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      const isVideo = file.type.startsWith("video/");
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        const dataUrl = evt.target.result;
-        try {
-          localStorage.setItem("obsidion_custom_wp", dataUrl);
-          localStorage.setItem("obsidion_custom_wp_isvideo", isVideo ? "true" : "false");
-          currentWpPreset = "custom";
-          localStorage.setItem("obsidion_wp_preset", "custom");
-          wpChips.forEach(c => c.dataset.preset === "custom" ? c.classList.add("active") : c.classList.remove("active"));
-          applyCustomMedia(dataUrl, isVideo);
-          startWallpaperEngine();
-          showToast("Custom wallpaper applied");
-        } catch (err) {
-          // In case quota exceeded for large videos, use Blob URL for this session
-          const blobUrl = URL.createObjectURL(file);
-          applyCustomMedia(blobUrl, isVideo);
-          showToast("Loaded large wallpaper into session");
-        }
-      };
-      reader.readAsDataURL(file);
+      const isVideo = file.type.startsWith("video/") || /\.(mp4|webm|ogv)$/i.test(file.name);
+
+      // Save binary Blob directly into IndexedDB (survives browser restarts, unlimited storage)
+      await saveWallpaperToDB(file, isVideo, file.name);
+
+      localStorage.setItem("obsidion_custom_wp_isvideo", isVideo ? "true" : "false");
+      currentWpPreset = "custom";
+      localStorage.setItem("obsidion_wp_preset", "custom");
+
+      wpChips.forEach(c => c.dataset.preset === "custom" ? c.classList.add("active") : c.classList.remove("active"));
+
+      if (activeCustomBlobUrl) URL.revokeObjectURL(activeCustomBlobUrl);
+      activeCustomBlobUrl = URL.createObjectURL(file);
+      applyCustomMedia(activeCustomBlobUrl, isVideo);
+      startWallpaperEngine();
+      showToast(`Custom wallpaper saved permanently: ${file.name}`);
     });
   }
 
   if (customWpUrl) {
-    customWpUrl.addEventListener("keydown", (e) => {
+    customWpUrl.addEventListener("keydown", async (e) => {
       if (e.key === "Enter") {
         const url = customWpUrl.value.trim();
         if (!url) return;
         const isVideo = /\.(mp4|webm|ogv)$/i.test(url);
+        await clearWallpaperDB();
         localStorage.setItem("obsidion_custom_wp", url);
         localStorage.setItem("obsidion_custom_wp_isvideo", isVideo ? "true" : "false");
         currentWpPreset = "custom";
